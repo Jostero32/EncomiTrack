@@ -1,0 +1,48 @@
+<div class="app-shell d-flex">
+  <aside class="sidebar text-white d-flex flex-column">
+    <div class="sidebar-brand px-3 py-4">
+      <div class="fw-semibold small text-uppercase opacity-75">Sistema</div>
+      <div class="fs-6 lh-sm">Paz y Salvo y Liquidación</div>
+    </div>
+    <nav class="nav flex-column px-2 gap-1 flex-grow-1">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="nav-link text-white rounded"
+      >
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+      <a
+        routerLink="/trabajadores"
+        routerLinkActive="active"
+        class="nav-link text-white rounded"
+      >
+        <i class="bi bi-people me-2"></i>Trabajadores
+      </a>
+      <a
+        routerLink="/expedientes"
+        routerLinkActive="active"
+        class="nav-link text-white rounded"
+      >
+        <i class="bi bi-folder2-open me-2"></i>Expedientes
+      </a>
+      <a
+        routerLink="/configuracion"
+        routerLinkActive="active"
+        class="nav-link text-white rounded"
+      >
+        <i class="bi bi-gear me-2"></i>Configuración
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content flex-grow-1">
+    <header class="page-header border-bottom bg-white px-4 py-3">
+      <h1 class="h4 mb-0">Sistema de Paz y Salvo y Liquidación</h1>
+    </header>
+    <div class="p-4">
+      <router-outlet />
+    </div>
+  </main>
+</div>
+<app-toasts />

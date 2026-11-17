@@ -1,0 +1,37 @@
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <h2 class="h5 mb-0">Configuración</h2>
+  <button type="button" class="btn btn-outline-secondary" (click)="cargarDemo()">
+    <i class="bi bi-database-add me-1"></i>Cargar caso demo
+  </button>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width: 720px">
+  <div class="card-header bg-white fw-semibold">Datos de la empresa</div>
+  <div class="card-body">
+    @if (loading()) {
+      <div class="text-muted">Cargando…</div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="mb-3">
+          <label class="form-label">Razón social</label>
+          <input class="form-control" formControlName="razonSocial" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">RUC</label>
+          <input class="form-control" formControlName="ruc" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Dirección</label>
+          <input class="form-control" formControlName="direccion" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Representante</label>
+          <input class="form-control" formControlName="representante" />
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          Guardar
+        </button>
+      </form>
+    }
+  </div>
+</div>

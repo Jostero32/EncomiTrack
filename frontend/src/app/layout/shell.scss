@@ -1,0 +1,33 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #1b3a4b 0%, #0f2740 100%);
+}
+
+.sidebar .nav-link {
+  padding: 0.65rem 0.9rem;
+  opacity: 0.85;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.main-content {
+  background: #f4f6f8;
+  min-width: 0;
+}
+
+.page-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}

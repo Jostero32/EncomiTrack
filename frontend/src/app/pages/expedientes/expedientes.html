@@ -1,0 +1,163 @@
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+  <h2 class="h5 mb-0">Expedientes</h2>
+  <button type="button" class="btn btn-primary" (click)="openCreate()">
+    <i class="bi bi-plus-lg me-1"></i>Nuevo expediente
+  </button>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-md-6">
+        <input
+          class="form-control"
+          placeholder="Buscar por número, cédula o nombre"
+          [value]="q()"
+          (input)="q.set($any($event.target).value)"
+          (keyup.enter)="load()"
+        />
+      </div>
+      <div class="col-md-4">
+        <select
+          class="form-select"
+          [value]="estado()"
+          (change)="estado.set($any($event.target).value); load()"
+        >
+          <option value="">Todos los estados</option>
+          @for (e of estados; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100" type="button" (click)="load()">
+          Filtrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Trabajador</th>
+          <th>Causa</th>
+          <th>Salida</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of expedientes(); track e.id) {
+          <tr>
+            <td>{{ e.numero }}</td>
+            <td>{{ e.trabajador?.nombres }} {{ e.trabajador?.apellidos }}</td>
+            <td>{{ e.causa }}</td>
+            <td>{{ e.fechaSalida | date: 'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="badge {{ badgeClass(e.estado) }}">{{ e.estado }}</span>
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" [routerLink]="['/expedientes', e.id]"
+                >Abrir</a
+              >
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">Sin expedientes</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (showForm()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.45)">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <form [formGroup]="form" (ngSubmit)="save()">
+          <div class="modal-header">
+            <h5 class="modal-title">Nuevo expediente</h5>
+            <button type="button" class="btn-close" (click)="closeForm()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label">Trabajador activo</label>
+                <select
+                  class="form-select"
+                  formControlName="trabajadorId"
+                  (change)="onTrabajadorChange()"
+                >
+                  <option [ngValue]="0">Seleccione…</option>
+                  @for (t of activos(); track t.id) {
+                    <option [ngValue]="t.id">
+                      {{ t.nombres }} {{ t.apellidos }} — {{ t.cedula }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Fecha de ingreso</label>
+                <input type="date" class="form-control" formControlName="fechaIngreso" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Fecha de salida</label>
+                <input type="date" class="form-control" formControlName="fechaSalida" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Causa</label>
+                <select class="form-select" formControlName="causa">
+                  @for (c of causas; track c) {
+                    <option [ngValue]="c">{{ c }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Región</label>
+                <select class="form-select" formControlName="region">
+                  @for (r of regiones; track r) {
+                    <option [ngValue]="r">{{ r }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Responsable</label>
+                <input class="form-control" formControlName="responsable" />
+              </div>
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    formControlName="decimosMensualizados"
+                    id="decimos"
+                  />
+                  <label class="form-check-label" for="decimos"
+                    >Décimos mensualizados</label
+                  >
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Observaciones</label>
+                <textarea class="form-control" rows="3" formControlName="observaciones"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}

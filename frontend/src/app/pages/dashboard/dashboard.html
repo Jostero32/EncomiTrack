@@ -1,0 +1,94 @@
+@if (loading()) {
+  <div class="text-muted">Cargando dashboard…</div>
+} @else if (data(); as d) {
+  <div class="row g-3 mb-4">
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">Trabajadores</div>
+          <div class="fs-3 fw-semibold">{{ d.totalTrabajadores }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">Activos</div>
+          <div class="fs-3 fw-semibold text-success">{{ d.activos }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">Expedientes</div>
+          <div class="fs-3 fw-semibold">{{ d.totalExpedientes }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">En proceso</div>
+          <div class="fs-3 fw-semibold text-warning">{{ d.enProceso }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">Paz y salvo pend.</div>
+          <div class="fs-3 fw-semibold text-info">{{ d.pazSalvoPendientes }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-xl-2">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="text-muted small">Finalizados</div>
+          <div class="fs-3 fw-semibold">{{ d.finalizados }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white fw-semibold">Últimos expedientes</div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Trabajador</th>
+            <th>Salida</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of d.ultimos5; track e.id) {
+            <tr>
+              <td>{{ e.numero }}</td>
+              <td>
+                {{ e.trabajador?.nombres }} {{ e.trabajador?.apellidos }}
+              </td>
+              <td>{{ e.fechaSalida | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge {{ badgeClass(e.estado) }}">{{ e.estado }}</span>
+              </td>
+              <td class="text-end">
+                <a [routerLink]="['/expedientes', e.id]" class="btn btn-sm btn-outline-primary"
+                  >Ver</a
+                >
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-muted text-center py-4">Sin expedientes</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
