@@ -42,4 +42,10 @@ export class ShellComponent {
   ];
 
   readonly itemsPlanos = this.menu.flatMap((g) => g.items);
+
+  /** Con <base href> en subruta, un href="#..." saldría de la ruta actual. */
+  saltarAlContenido(ev: Event): void {
+    ev.preventDefault();
+    document.getElementById('contenido')?.focus();
+  }
 }

@@ -1,7 +1,13 @@
+# Despliegue local idéntico al de producción: todo bajo /liquidacion.
+#   App: http://localhost:8080/liquidacion/
+#   API: http://localhost:8080/liquidacion/api/health
+# Para servir en la raíz, cambie BASE_PATH a "" en los dos servicios.
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
     environment:
+      BASE_PATH: /liquidacion
       DB_PATH: /data/app.db
       UPLOADS_DIR: /data/uploads
       PORT: 3000
@@ -9,10 +15,18 @@ services:
       - ./data:/data
     expose:
       - "3000"
+    restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        BASE_PATH: /liquidacion
+    environment:
+      BASE_PATH: /liquidacion
+      BACKEND_URL: http://backend:3000
     ports:
       - "8080:80"
     depends_on:
       - backend
+    restart: unless-stopped

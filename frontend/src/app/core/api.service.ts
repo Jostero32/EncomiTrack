@@ -30,7 +30,8 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly base = '/api';
+  /** Relativa al <base href>: /api en desarrollo, /liquidacion/api publicada. */
+  private readonly base = 'api';
 
   getEmpresa(): Observable<Empresa> {
     return this.http.get<Empresa>(`${this.base}/empresa`);

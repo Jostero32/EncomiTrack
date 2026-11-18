@@ -27,24 +27,34 @@ async function main() {
   app.use(cors());
   app.use(express.json());
 
-  app.use('/api/empresa', empresaRouter);
-  app.use('/api/trabajadores', trabajadoresRouter);
-  app.use('/api/trabajadores/:id', trabajadorRecursosRouter);
-  app.use('/api/plantilla-requisitos', plantillaRouter);
-  app.use('/api/expedientes/:id/documentos', expedienteDocumentosRouter);
-  app.use('/api/expedientes', expedientesRouter);
-  app.use('/api/expedientes/:id/liquidacion', liquidacionRouter);
-  app.use('/api/expedientes/:id/pdf', documentosRouter);
-  app.use('/api/documentos', archivosRouter);
-  app.use('/api/requisitos', requisitosRouter);
-  app.use('/api/dashboard', dashboardRouter);
-  app.use('/api/demo', demoRouter);
+  const api = express.Router();
+  api.get('/health', (_req, res) => {
+    res.json({ ok: true });
+  });
+  api.use('/empresa', empresaRouter);
+  api.use('/trabajadores', trabajadoresRouter);
+  api.use('/trabajadores/:id', trabajadorRecursosRouter);
+  api.use('/plantilla-requisitos', plantillaRouter);
+  api.use('/expedientes/:id/documentos', expedienteDocumentosRouter);
+  api.use('/expedientes', expedientesRouter);
+  api.use('/expedientes/:id/liquidacion', liquidacionRouter);
+  api.use('/expedientes/:id/pdf', documentosRouter);
+  api.use('/documentos', archivosRouter);
+  api.use('/requisitos', requisitosRouter);
+  api.use('/dashboard', dashboardRouter);
+  api.use('/demo', demoRouter);
+
+  // Prefijo de publicación (p. ej. /liquidacion en Dokploy, sin "strip path").
+  // La API responde en <BASE_PATH>/api y también en /api (desarrollo local y
+  // proxies que quitan el prefijo).
+  const basePath = (process.env.BASE_PATH ?? '').replace(/\/+$/, '');
+  app.use(basePath ? [`${basePath}/api`, '/api'] : '/api', api);
 
   app.use(errorHandler);
 
   const port = Number(process.env.PORT) || 3000;
   app.listen(port, () => {
-    console.log(`API escuchando en puerto ${port}`);
+    console.log(`API escuchando en puerto ${port} (ruta ${basePath || ''}/api)`);
   });
 }
 
