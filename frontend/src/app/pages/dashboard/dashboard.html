@@ -1,6 +1,10 @@
 @if (loading()) {
   <div class="text-muted">Cargando dashboard…</div>
 } @else if (data(); as d) {
+  <div class="mb-3">
+    <h2 class="h4 mb-0">Dashboard</h2>
+    <div class="text-muted small">Resumen de salidas, paz y salvo y liquidaciones</div>
+  </div>
   <div class="row g-3 mb-4">
     <div class="col-md-4 col-xl-2">
       <div class="card h-100 shadow-sm border-0">
@@ -30,7 +34,7 @@
       <div class="card h-100 shadow-sm border-0">
         <div class="card-body">
           <div class="text-muted small">En proceso</div>
-          <div class="fs-3 fw-semibold text-warning">{{ d.enProceso }}</div>
+          <div class="fs-3 fw-semibold text-warning-emphasis">{{ d.enProceso }}</div>
         </div>
       </div>
     </div>

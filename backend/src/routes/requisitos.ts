@@ -3,16 +3,18 @@ import { z } from 'zod';
 import { AppDataSource } from '../data-source';
 import { Expediente } from '../entities/Expediente';
 import { Requisito } from '../entities/Requisito';
-import { badRequest, forbidden, notFound } from '../errors';
+import { forbidden, notFound } from '../errors';
 import { asyncHandler } from '../middleware';
+import { aplicarRespuesta } from '../paz-salvo-db';
 
 const router = Router();
 const repo = () => AppDataSource.getRepository(Requisito);
 const expRepo = () => AppDataSource.getRepository(Expediente);
 
 const patchSchema = z.object({
-  estado: z.enum(['Pendiente', 'Aprobado', 'Rechazado']),
-  responsable: z.string().min(1, 'Responsable es obligatorio'),
+  respuesta: z.enum(['SI', 'NO', 'N/A']).nullable(),
+  /** Opcional: el responsable se registra al certificar el área. */
+  responsable: z.string().trim().optional().nullable(),
   observacion: z.string().optional().nullable(),
 });
 
@@ -29,21 +31,20 @@ router.patch(
       requisito.expediente ||
       (await expRepo().findOne({ where: { id: requisito.expedienteId } }));
     if (!expediente) throw notFound('Expediente no encontrado');
-    if (expediente.estado === 'Finalizado') {
-      throw forbidden('Expediente finalizado: solo lectura');
+    if (expediente.estado !== 'En proceso') {
+      throw forbidden(
+        expediente.estado === 'Finalizado'
+          ? 'Expediente finalizado: solo lectura'
+          : 'El paz y salvo ya fue aprobado',
+      );
     }
 
     const data = patchSchema.parse(req.body);
-    if (data.estado === 'Rechazado' && !data.observacion?.trim()) {
-      throw badRequest('Observación obligatoria al rechazar');
-    }
+    await AppDataSource.transaction((manager) =>
+      aplicarRespuesta(manager, requisito, data),
+    );
 
-    requisito.estado = data.estado;
-    requisito.responsable = data.responsable;
-    requisito.observacion = data.observacion ?? null;
-    requisito.fechaRevision = new Date();
-
-    const saved = await repo().save(requisito);
+    const { expediente: _omit, ...saved } = requisito;
     res.json(saved);
   }),
 );

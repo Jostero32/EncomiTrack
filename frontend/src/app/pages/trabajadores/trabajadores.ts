@@ -8,7 +8,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { apiErrorMessage } from '../../core/error.util';
-import { Expediente, Trabajador } from '../../core/models';
+import { Expediente, SBU, TIPOS_VINCULO, TipoVinculo, Trabajador } from '../../core/models';
 import { ToastService } from '../../core/toast.service';
 
 @Component({
@@ -21,6 +21,7 @@ export class TrabajadoresComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  readonly sbu = SBU;
 
   readonly trabajadores = signal<Trabajador[]>([]);
   readonly historial = signal<Expediente[]>([]);
@@ -29,6 +30,7 @@ export class TrabajadoresComponent implements OnInit {
   readonly showHistorial = signal(false);
   readonly editingId = signal<number | null>(null);
   readonly historialNombre = signal('');
+  readonly tiposVinculo = TIPOS_VINCULO;
 
   readonly form = this.fb.nonNullable.group({
     cedula: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -36,8 +38,11 @@ export class TrabajadoresComponent implements OnInit {
     apellidos: ['', Validators.required],
     cargo: ['', Validators.required],
     departamento: ['', Validators.required],
+    tipoVinculo: ['Código de Trabajo' as TipoVinculo, Validators.required],
+    unidad: [''],
+    jefeInmediato: [''],
     fechaIngreso: ['', Validators.required],
-    remuneracion: [0, [Validators.required, Validators.min(0.01)]],
+    remuneracion: [0, [Validators.required, Validators.min(SBU)]],
   });
 
   ngOnInit(): void {
@@ -63,6 +68,9 @@ export class TrabajadoresComponent implements OnInit {
       apellidos: '',
       cargo: '',
       departamento: '',
+      tipoVinculo: 'Código de Trabajo',
+      unidad: '',
+      jefeInmediato: '',
       fechaIngreso: '',
       remuneracion: 0,
     });
@@ -77,6 +85,9 @@ export class TrabajadoresComponent implements OnInit {
       apellidos: t.apellidos,
       cargo: t.cargo,
       departamento: t.departamento,
+      tipoVinculo: t.tipoVinculo ?? 'Código de Trabajo',
+      unidad: t.unidad ?? '',
+      jefeInmediato: t.jefeInmediato ?? '',
       fechaIngreso: t.fechaIngreso,
       remuneracion: Number(t.remuneracion),
     });
@@ -92,7 +103,12 @@ export class TrabajadoresComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    const value = this.form.getRawValue();
+    const raw = this.form.getRawValue();
+    const value = {
+      ...raw,
+      unidad: raw.unidad.trim() || null,
+      jefeInmediato: raw.jefeInmediato.trim() || null,
+    };
     const id = this.editingId();
     const req = id
       ? this.api.updateTrabajador(id, value)

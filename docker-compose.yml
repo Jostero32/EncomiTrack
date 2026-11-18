@@ -3,6 +3,7 @@ services:
     build: ./backend
     environment:
       DB_PATH: /data/app.db
+      UPLOADS_DIR: /data/uploads
       PORT: 3000
     volumes:
       - ./data:/data

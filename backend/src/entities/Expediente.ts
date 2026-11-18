@@ -8,6 +8,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { decimalTransformer } from '../transformers';
+import { AprobacionDepartamento } from './AprobacionDepartamento';
+import { Documento } from './Documento';
 import { Liquidacion } from './Liquidacion';
 import { Requisito } from './Requisito';
 import { Trabajador } from './Trabajador';
@@ -48,6 +50,10 @@ export class Expediente {
   @Column({ type: 'boolean' })
   decimosMensualizados!: boolean;
 
+  /** true: el fondo de reserva se paga en rol y el del último mes entra en la liquidación. */
+  @Column({ type: 'boolean', default: false })
+  fondosReservaMensualizados!: boolean;
+
   @Column({ type: 'varchar' })
   cargo!: string;
 
@@ -74,6 +80,12 @@ export class Expediente {
   @OneToMany(() => Requisito, (requisito) => requisito.expediente)
   requisitos!: Requisito[];
 
+  @OneToMany(() => Documento, (documento) => documento.expediente)
+  documentos!: Documento[];
+
   @OneToOne(() => Liquidacion, (liquidacion) => liquidacion.expediente)
   liquidacion!: Liquidacion | null;
+
+  @OneToMany(() => AprobacionDepartamento, (a) => a.expediente)
+  aprobaciones!: AprobacionDepartamento[];
 }

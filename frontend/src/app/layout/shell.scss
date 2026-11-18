@@ -1,33 +1,127 @@
-.app-shell {
-  min-height: 100vh;
+$ancho-sidebar: 240px;
+
+.saltar-contenido {
+  position: absolute;
+  z-index: 2100;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background: var(--et-azul);
+  color: #fff;
 }
 
+/* ---- Barra lateral (escritorio) ---- */
 .sidebar {
-  width: 260px;
-  min-height: 100vh;
-  position: sticky;
-  top: 0;
-  background: linear-gradient(180deg, #1b3a4b 0%, #0f2740 100%);
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  width: $ancho-sidebar;
+  background: #fff;
+  border-right: 1px solid var(--et-borde);
 }
 
-.sidebar .nav-link {
-  padding: 0.65rem 0.9rem;
-  opacity: 0.85;
+.marca {
+  height: 4.25rem;
+  border-bottom: 1px solid var(--et-borde);
+  color: var(--et-tinta);
 }
 
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active {
-  background: rgba(255, 255, 255, 0.12);
-  opacity: 1;
+.marca img {
+  flex: none;
 }
 
-.main-content {
-  background: #f4f6f8;
+.marca-empresa {
+  color: var(--et-azul);
+}
+
+.marca-sistema {
+  color: var(--et-gris);
+}
+
+.grupo-titulo {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--et-gris);
+}
+
+.item-menu {
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--et-gris);
+}
+
+.item-menu:hover {
+  background: #f6f3f0;
+  color: var(--et-tinta);
+}
+
+.item-menu.active {
+  background: var(--et-azul-suave);
+  color: var(--et-azul);
+}
+
+/* Marca dorada a la izquierda de la opción activa. */
+.item-menu.active::before {
+  position: absolute;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  left: 0;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--et-dorado);
+  content: '';
+}
+
+.pie-sidebar {
+  font-size: 0.6875rem;
+  color: var(--et-gris);
+  border-top: 1px solid var(--et-borde);
+}
+
+/* ---- Contenido ---- */
+.contenido {
   min-width: 0;
+  outline: none;
 }
 
-.page-header {
+.contenido-interno {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+@media (min-width: 768px) {
+  .contenido {
+    margin-left: $ancho-sidebar;
+  }
+}
+
+/* ---- Barra superior (móvil) ---- */
+.barra-movil {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 30;
+  background: #fff;
+  border-bottom: 1px solid var(--et-borde);
+}
+
+.item-menu-movil {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--et-gris);
+}
+
+.item-menu-movil.active {
+  background: var(--et-azul-suave);
+  color: var(--et-azul);
+}
+
+@media (max-width: 767.98px) {
+  .contenido-interno {
+    padding: 1rem;
+  }
 }

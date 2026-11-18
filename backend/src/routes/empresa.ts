@@ -13,6 +13,13 @@ const empresaSchema = z.object({
   ruc: z.string().min(1),
   direccion: z.string().min(1),
   representante: z.string().min(1),
+  ciudad: z.string().trim().optional().nullable(),
+  elaboradoNombre: z.string().trim().optional().nullable(),
+  elaboradoCargo: z.string().trim().optional().nullable(),
+  revisadoNombre: z.string().trim().optional().nullable(),
+  revisadoCargo: z.string().trim().optional().nullable(),
+  aprobadoNombre: z.string().trim().optional().nullable(),
+  aprobadoCargo: z.string().trim().optional().nullable(),
 });
 
 router.get(

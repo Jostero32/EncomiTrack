@@ -1,46 +1,62 @@
-<div class="app-shell d-flex">
-  <aside class="sidebar text-white d-flex flex-column">
-    <div class="sidebar-brand px-3 py-4">
-      <div class="fw-semibold small text-uppercase opacity-75">Sistema</div>
-      <div class="fs-6 lh-sm">Paz y Salvo y Liquidación</div>
-    </div>
-    <nav class="nav flex-column px-2 gap-1 flex-grow-1">
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        class="nav-link text-white rounded"
-      >
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard
-      </a>
-      <a
-        routerLink="/trabajadores"
-        routerLinkActive="active"
-        class="nav-link text-white rounded"
-      >
-        <i class="bi bi-people me-2"></i>Trabajadores
-      </a>
-      <a
-        routerLink="/expedientes"
-        routerLinkActive="active"
-        class="nav-link text-white rounded"
-      >
-        <i class="bi bi-folder2-open me-2"></i>Expedientes
-      </a>
-      <a
-        routerLink="/configuracion"
-        routerLinkActive="active"
-        class="nav-link text-white rounded"
-      >
-        <i class="bi bi-gear me-2"></i>Configuración
-      </a>
+<a class="saltar-contenido visually-hidden-focusable" href="#contenido">Saltar al contenido</a>
+
+<div class="app-shell">
+  <!-- Escritorio -->
+  <aside class="sidebar d-none d-md-flex flex-column" aria-label="Navegación principal">
+    <div class="franja-marca" aria-hidden="true"><span></span><span></span><span></span></div>
+    <a routerLink="/dashboard" class="marca d-flex align-items-center gap-2 px-3 text-decoration-none">
+      <img src="brand/encomitrack.svg" alt="" width="36" height="36" />
+      <span class="lh-sm">
+        <span class="d-block fw-semibold marca-empresa">{{ marca.empresa }}</span>
+        <span class="d-block small marca-sistema">{{ marca.sistema }}</span>
+      </span>
+    </a>
+    <nav class="flex-grow-1 overflow-auto p-2">
+      @for (g of menu; track g.titulo) {
+        <div class="mb-3">
+          <p class="grupo-titulo px-3 mb-1">{{ g.titulo }}</p>
+          @for (i of g.items; track i.ruta) {
+            <a
+              [routerLink]="i.ruta"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              class="item-menu d-flex align-items-center gap-2 px-3 py-2 rounded text-decoration-none"
+            >
+              <i class="bi {{ i.icono }}" aria-hidden="true"></i>{{ i.etiqueta }}
+            </a>
+          }
+        </div>
+      }
     </nav>
+    <p class="pie-sidebar px-3 py-2 mb-0">Código del Trabajo · Ecuador</p>
   </aside>
 
-  <main class="main-content flex-grow-1">
-    <header class="page-header border-bottom bg-white px-4 py-3">
-      <h1 class="h4 mb-0">Sistema de Paz y Salvo y Liquidación</h1>
-    </header>
-    <div class="p-4">
+  <!-- Móvil -->
+  <header class="barra-movil d-md-none">
+    <div class="franja-marca" aria-hidden="true"><span></span><span></span><span></span></div>
+    <a routerLink="/dashboard" class="d-flex align-items-center gap-2 px-3 py-2 text-decoration-none">
+      <img src="brand/encomitrack.svg" alt="" width="28" height="28" />
+      <span class="lh-sm">
+        <span class="d-block fw-semibold small marca-empresa">{{ marca.empresa }}</span>
+        <span class="d-block marca-sistema" style="font-size: 0.7rem">{{ marca.sistema }}</span>
+      </span>
+    </a>
+    <nav class="d-flex gap-1 overflow-auto px-2 pb-2" aria-label="Navegación principal">
+      @for (i of itemsPlanos; track i.ruta) {
+        <a
+          [routerLink]="i.ruta"
+          routerLinkActive="active"
+          ariaCurrentWhenActive="page"
+          class="item-menu-movil d-flex align-items-center gap-1 px-3 py-1 rounded text-nowrap text-decoration-none"
+        >
+          <i class="bi {{ i.icono }}" aria-hidden="true"></i>{{ i.etiqueta }}
+        </a>
+      }
+    </nav>
+  </header>
+
+  <main id="contenido" class="contenido" tabindex="-1">
+    <div class="contenido-interno">
       <router-outlet />
     </div>
   </main>

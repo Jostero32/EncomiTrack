@@ -1,3 +1,71 @@
+/*
+ * Identidad visual de EncomiTrack (tomada del sistema de Roles de Pago,
+ * ROLES_PAGO/src/lib/brand.ts). Si cambia un color, actualícelo también en
+ * backend/src/pdf-helpers.ts (MARCA) para los PDF.
+ */
+$et-azul: #11406f;
+$et-azul-oscuro: #0c3157;
+$et-azul-suave: #e5edf6;
+$et-rojo: #ba2b32;
+$et-rojo-suave: #fbeaeb;
+$et-dorado: #e8b406;
+$et-dorado-suave: #fcf3d6;
+$et-dorado-texto: #7a5a00;
+$et-fondo: #f1edea;
+$et-tinta: #1b2533;
+$et-gris: #66615c;
+$et-borde: #ddd6cf;
+$et-verde: #067647;
+$et-verde-suave: #ecfdf3;
+
+// ---- Bootstrap con la paleta de marca
+$primary: $et-azul;
+$secondary: $et-gris;
+$success: $et-verde;
+$danger: $et-rojo;
+$warning: $et-dorado;
+$info: #2c6e9b;
+$light: #f6f3f0;
+$dark: $et-tinta;
+
+$body-bg: #fff;
+$body-secondary-bg: $et-fondo;
+$body-color: $et-tinta;
+$border-color: $et-borde;
+$link-color: $et-azul;
+$font-family-sans-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+$headings-font-weight: 600;
+$border-radius: 0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+$card-border-color: $et-borde;
+$card-cap-bg: #fff;
+$input-border-color: #d3cbc3;
+$table-striped-bg: #f7f4f1;
+$nav-pills-link-active-bg: $et-azul;
+$progress-bar-bg: $et-azul;
+$focus-ring-color: rgba($et-azul, 0.35);
+
+@import 'bootstrap/scss/bootstrap';
+
+// ---- Tokens para estilos propios de los componentes
+:root {
+  --et-azul: #{$et-azul};
+  --et-azul-oscuro: #{$et-azul-oscuro};
+  --et-azul-suave: #{$et-azul-suave};
+  --et-rojo: #{$et-rojo};
+  --et-rojo-suave: #{$et-rojo-suave};
+  --et-dorado: #{$et-dorado};
+  --et-dorado-suave: #{$et-dorado-suave};
+  --et-dorado-texto: #{$et-dorado-texto};
+  --et-fondo: #{$et-fondo};
+  --et-tinta: #{$et-tinta};
+  --et-gris: #{$et-gris};
+  --et-borde: #{$et-borde};
+  --et-verde: #{$et-verde};
+  --et-verde-suave: #{$et-verde-suave};
+}
+
 html,
 body {
   height: 100%;
@@ -5,5 +73,64 @@ body {
 
 body {
   margin: 0;
-  background: #f4f6f8;
+  background: var(--et-fondo);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.card {
+  box-shadow: 0 1px 2px rgba(27, 37, 51, 0.05) !important;
+}
+
+.tabular,
+.table td.text-end {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Franja de marca (azul · dorado · rojo). */
+.franja-marca {
+  display: flex;
+  height: 4px;
+}
+
+.franja-marca > span:nth-child(1) {
+  flex: 3;
+  background: var(--et-azul);
+}
+
+.franja-marca > span:nth-child(2) {
+  flex: 1;
+  background: var(--et-dorado);
+}
+
+.franja-marca > span:nth-child(3) {
+  flex: 1;
+  background: var(--et-rojo);
+}
+
+/* Foco visible en todos los elementos interactivos. */
+:focus-visible {
+  outline: 2px solid var(--et-azul);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid var(--et-azul);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Área táctil mínima de 24 x 24 px. */
+.btn-sm,
+.btn-close {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Pestañas del expediente con la marca dorada en la activa. */
+.nav-tabs .nav-link.active {
+  border-top: 3px solid var(--et-dorado);
+  font-weight: 600;
 }

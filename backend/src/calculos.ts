@@ -17,6 +17,8 @@ export type ManualItem = {
   concepto: string;
   valor: number | string;
   justificacion: string;
+  /** id de la Obligacion de origen, si aplica. */
+  referenciaId?: number;
 };
 
 export type CalculoEntradas = {
@@ -27,9 +29,15 @@ export type CalculoEntradas = {
   region: Region;
   decimosMensualizados: boolean;
   diasVacacionesPendientesAnteriores?: number;
+  /** Días gozados que se imputaron al período en curso (anticipo de vacaciones). */
+  diasGozadosPeriodoEnCurso?: number;
+  /** true: el fondo de reserva se paga en rol (mensualizado) y entra en la liquidación. */
+  fondosReservaMensualizados?: boolean;
   otrosHaberes?: ManualItem[];
   anticipos?: ManualItem[];
   otrasDeducciones?: ManualItem[];
+  /** Obligaciones pendientes del trabajador, se descuentan automáticamente. */
+  obligaciones?: ManualItem[];
 };
 
 export type Rubro = {
@@ -37,7 +45,9 @@ export type Rubro = {
   tipo: 'haber' | 'deduccion';
   valor: string;
   formula: string;
-  origen: 'auto' | 'manual';
+  origen: 'auto' | 'manual' | 'obligacion';
+  /** id de la Obligacion descontada (solo origen 'obligacion'). */
+  referenciaId?: number;
 };
 
 export type ResultadoLiquidacion = {
@@ -46,6 +56,12 @@ export type ResultadoLiquidacion = {
   totalDeducciones: string;
   neto: string;
 };
+
+/** Número con 2 decimales en formato es-EC: 1234.5 → "1.234,50". */
+export function formatoDecimalEc(value: Decimal.Value): string {
+  const [ent, dec] = new Decimal(value).toFixed(2).split('.');
+  return `${ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.')},${dec}`;
+}
 
 function money(value: Decimal.Value): Decimal {
   return new Decimal(value).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
@@ -203,13 +219,19 @@ export function calcularDecimoCuarto(params: {
   );
 }
 
-export function calcularVacaciones(params: {
+export function calcularVacacionesDetalle(params: {
   remuneracion: number | string;
   fechaIngreso: string;
   fechaSalida: string;
   sueldoPendiente: Decimal;
   diasVacacionesPendientesAnteriores?: number;
-}): Decimal {
+  diasGozadosPeriodoEnCurso?: number;
+}): {
+  pendientes: Decimal;
+  proporcional: Decimal;
+  descuentoGozados: Decimal;
+  total: Decimal;
+} {
   const ingreso = parseDate(params.fechaIngreso);
   const salida = parseDate(params.fechaSalida);
   const { aniosCompletos } = tiempoServicio(
@@ -237,29 +259,203 @@ export function calcularVacaciones(params: {
   const remuneraciones = new Decimal(params.remuneracion)
     .times(mesesCompletos)
     .plus(params.sueldoPendiente);
-  const base = remuneraciones.div(24);
+  const bruto = money(remuneraciones.div(24));
+
+  // Los días ya gozados del período en curso se restan a valor por día
+  // (remuneración/30); el proporcional no baja de cero.
+  const valorDia = new Decimal(params.remuneracion).div(30);
+  const diasEnCurso = params.diasGozadosPeriodoEnCurso ?? 0;
+  const descuentoGozados = Decimal.min(money(valorDia.times(diasEnCurso)), bruto);
+  const proporcional = bruto.minus(descuentoGozados);
 
   const diasAnt = params.diasVacacionesPendientesAnteriores ?? 0;
-  const pendientes = new Decimal(params.remuneracion)
-    .div(30)
-    .times(diasAnt);
+  const pendientes = money(valorDia.times(diasAnt));
 
-  return assertNonNegative(money(base.plus(pendientes)), 'Vacaciones');
+  return {
+    pendientes: assertNonNegative(pendientes, 'Vacaciones pendientes'),
+    proporcional: assertNonNegative(proporcional, 'Vacaciones proporcionales'),
+    descuentoGozados,
+    total: assertNonNegative(money(proporcional.plus(pendientes)), 'Vacaciones'),
+  };
 }
 
+export function calcularVacaciones(params: {
+  remuneracion: number | string;
+  fechaIngreso: string;
+  fechaSalida: string;
+  sueldoPendiente: Decimal;
+  diasVacacionesPendientesAnteriores?: number;
+  diasGozadosPeriodoEnCurso?: number;
+}): Decimal {
+  return calcularVacacionesDetalle(params).total;
+}
+
+export type VacacionGozadaInput = {
+  fechaInicio: string;
+  dias: number;
+};
+
+export type PeriodoVacaciones = {
+  numero: number;
+  desde: string;
+  hasta: string;
+  completo: boolean;
+  diasGenerados: number;
+  diasGozados: number;
+  saldo: number;
+};
+
+export type ResultadoVacaciones = {
+  fechaCorte: string;
+  periodos: PeriodoVacaciones[];
+  diasGozadosTotal: number;
+  saldoPeriodosCompletos: number;
+};
+
+/** 15 días por período + 1 adicional por cada año excedente desde el 6.º (máx. 15). */
+export function diasVacacionesPorPeriodo(numeroPeriodo: number): number {
+  const adicionales = Math.min(Math.max(numeroPeriodo - 5, 0), 15);
+  return 15 + adicionales;
+}
+
+function toIso(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Períodos anuales de vacaciones desde la fecha de ingreso hasta la fecha de corte
+ * (Código del Trabajo, art. 69). Los días gozados se imputan al período completo más
+ * antiguo con saldo; el excedente (anticipo de vacaciones) se imputa al período en curso.
+ */
+export function calcularPeriodosVacaciones(
+  fechaIngreso: string,
+  fechaCorte: string,
+  gozadas: VacacionGozadaInput[],
+): ResultadoVacaciones {
+  const ingreso = parseDate(fechaIngreso);
+  const corte = parseDate(fechaCorte);
+  const periodos: PeriodoVacaciones[] = [];
+
+  if (corte >= ingreso) {
+    const { aniosCompletos, diasRestantes } = tiempoServicio(
+      fechaIngreso,
+      fechaCorte,
+    );
+    for (let n = 1; n <= aniosCompletos; n += 1) {
+      periodos.push({
+        numero: n,
+        desde: toIso(addYears(ingreso, n - 1)),
+        hasta: toIso(addDays(addYears(ingreso, n), -1)),
+        completo: true,
+        diasGenerados: diasVacacionesPorPeriodo(n),
+        diasGozados: 0,
+        saldo: 0,
+      });
+    }
+    const numero = aniosCompletos + 1;
+    const proporcional = new Decimal(diasVacacionesPorPeriodo(numero))
+      .times(diasRestantes)
+      .div(365)
+      .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
+      .toNumber();
+    periodos.push({
+      numero,
+      desde: toIso(addYears(ingreso, aniosCompletos)),
+      hasta: toIso(corte),
+      completo: false,
+      diasGenerados: proporcional,
+      diasGozados: 0,
+      saldo: 0,
+    });
+  }
+
+  const ordenadas = [...gozadas].sort((a, b) =>
+    a.fechaInicio.localeCompare(b.fechaInicio),
+  );
+  let diasGozadosTotal = new Decimal(0);
+  for (const g of ordenadas) {
+    let restante = new Decimal(g.dias);
+    diasGozadosTotal = diasGozadosTotal.plus(g.dias);
+    for (const p of periodos) {
+      if (restante.lte(0)) break;
+      if (!p.completo) continue;
+      const disponible = new Decimal(p.diasGenerados).minus(p.diasGozados);
+      if (disponible.lte(0)) continue;
+      const imputar = Decimal.min(disponible, restante);
+      p.diasGozados = new Decimal(p.diasGozados).plus(imputar).toNumber();
+      restante = restante.minus(imputar);
+    }
+    const enCurso = periodos.find((p) => !p.completo);
+    if (restante.gt(0) && enCurso) {
+      enCurso.diasGozados = new Decimal(enCurso.diasGozados)
+        .plus(restante)
+        .toNumber();
+    }
+  }
+
+  let saldoCompletos = new Decimal(0);
+  for (const p of periodos) {
+    p.saldo = new Decimal(p.diasGenerados).minus(p.diasGozados).toNumber();
+    if (p.completo) saldoCompletos = saldoCompletos.plus(p.saldo);
+  }
+
+  return {
+    fechaCorte: toIso(corte),
+    periodos,
+    diasGozadosTotal: diasGozadosTotal.toNumber(),
+    saldoPeriodosCompletos: saldoCompletos.toNumber(),
+  };
+}
+
+/**
+ * Causas que generan la bonificación por desahucio (art. 185 CT): desahucio
+ * pedido por cualquiera de las partes (la renuncia se tramita como desahucio
+ * del trabajador, art. 184), acuerdo entre las partes y despido intempestivo
+ * (art. 188, que la suma a la indemnización).
+ */
+export const CAUSAS_CON_DESAHUCIO: readonly Causa[] = [
+  'Renuncia voluntaria',
+  'Desahucio',
+  'Mutuo acuerdo',
+  'Despido intempestivo',
+];
+
+/** 25 % de la última remuneración por cada año completo de servicio. */
 export function calcularDesahucio(params: {
   remuneracion: number | string;
   fechaIngreso: string;
   fechaSalida: string;
   causa: Causa;
 }): Decimal {
-  if (params.causa !== 'Desahucio' && params.causa !== 'Despido intempestivo') {
-    return money(0);
-  }
-  const { fraccion } = tiempoServicio(params.fechaIngreso, params.fechaSalida);
+  if (!CAUSAS_CON_DESAHUCIO.includes(params.causa)) return money(0);
+  const { aniosCompletos } = tiempoServicio(params.fechaIngreso, params.fechaSalida);
   return assertNonNegative(
-    money(new Decimal(params.remuneracion).times(0.25).times(fraccion)),
+    money(new Decimal(params.remuneracion).times(0.25).times(aniosCompletos)),
     'Desahucio',
+  );
+}
+
+/**
+ * Fondo de reserva del mes de salida (art. 196 CT): 8,33 % del sueldo pendiente
+ * desde el segundo año de servicio. Solo entra en la liquidación si está
+ * mensualizado; si no, el empleador lo deposita en el IESS.
+ */
+export function calcularFondosReserva(params: {
+  fechaIngreso: string;
+  fechaSalida: string;
+  sueldoPendiente: Decimal;
+  mensualizados: boolean;
+}): Decimal {
+  if (!params.mensualizados) return money(0);
+  const { aniosCompletos } = tiempoServicio(params.fechaIngreso, params.fechaSalida);
+  if (aniosCompletos < 1) return money(0);
+  return assertNonNegative(
+    money(params.sueldoPendiente.times(0.0833)),
+    'Fondos de reserva',
   );
 }
 
@@ -301,6 +497,7 @@ export function calcularAporteIess(sueldoPendiente: Decimal): Decimal {
 function mapManuales(
   items: ManualItem[] | undefined,
   tipo: 'haber' | 'deduccion',
+  origen: 'manual' | 'obligacion' = 'manual',
 ): Rubro[] {
   if (!items?.length) return [];
   return items.map((item) => {
@@ -310,7 +507,8 @@ function mapManuales(
       tipo,
       valor: valor.toFixed(2),
       formula: item.justificacion,
-      origen: 'manual' as const,
+      origen,
+      ...(item.referenciaId !== undefined ? { referenciaId: item.referenciaId } : {}),
     };
   });
 }
@@ -322,13 +520,14 @@ export function calcularLiquidacion(
     entradas.remuneracion,
     entradas.fechaSalida,
   );
-  const vacaciones = calcularVacaciones({
+  const vacaciones = calcularVacacionesDetalle({
     remuneracion: entradas.remuneracion,
     fechaIngreso: entradas.fechaIngreso,
     fechaSalida: entradas.fechaSalida,
     sueldoPendiente,
     diasVacacionesPendientesAnteriores:
       entradas.diasVacacionesPendientesAnteriores,
+    diasGozadosPeriodoEnCurso: entradas.diasGozadosPeriodoEnCurso,
   });
   const decimoTercero = calcularDecimoTercero({
     remuneracion: entradas.remuneracion,
@@ -353,7 +552,14 @@ export function calcularLiquidacion(
     fechaSalida: entradas.fechaSalida,
     causa: entradas.causa,
   });
+  const fondosReserva = calcularFondosReserva({
+    fechaIngreso: entradas.fechaIngreso,
+    fechaSalida: entradas.fechaSalida,
+    sueldoPendiente,
+    mensualizados: entradas.fondosReservaMensualizados ?? false,
+  });
   const iess = calcularAporteIess(sueldoPendiente);
+  const diasEnCurso = entradas.diasGozadosPeriodoEnCurso ?? 0;
 
   const rubros: Rubro[] = [
     {
@@ -366,8 +572,12 @@ export function calcularLiquidacion(
     {
       concepto: 'Vacaciones',
       tipo: 'haber',
-      valor: vacaciones.toFixed(2),
-      formula: 'remuneraciones desde aniversario/24 + días pendientes × remuneración/30',
+      valor: vacaciones.total.toFixed(2),
+      formula:
+        `${entradas.diasVacacionesPendientesAnteriores ?? 0} días de saldo × remuneración/30 (${formatoDecimalEc(vacaciones.pendientes)}) + remuneraciones del período en curso/24` +
+        (diasEnCurso > 0
+          ? ` − ${diasEnCurso} días gozados × remuneración/30 (${formatoDecimalEc(vacaciones.descuentoGozados)}) = ${formatoDecimalEc(vacaciones.proporcional)}`
+          : ` (${formatoDecimalEc(vacaciones.proporcional)})`),
       origen: 'auto',
     },
     {
@@ -395,7 +605,16 @@ export function calcularLiquidacion(
       concepto: 'Desahucio',
       tipo: 'haber',
       valor: desahucio.toFixed(2),
-      formula: '25% × remuneración × tiempo de servicio',
+      formula: '25% × remuneración × años completos de servicio (art. 185)',
+      origen: 'auto',
+    },
+    {
+      concepto: 'Fondos de reserva',
+      tipo: 'haber',
+      valor: fondosReserva.toFixed(2),
+      formula: entradas.fondosReservaMensualizados
+        ? '8,33% × sueldo pendiente (desde el 2.º año, mensualizado)'
+        : 'no mensualizado: se deposita en el IESS',
       origen: 'auto',
     },
     ...mapManuales(entradas.otrosHaberes, 'haber'),
@@ -406,6 +625,7 @@ export function calcularLiquidacion(
       formula: '9.45% × sueldo pendiente',
       origen: 'auto',
     },
+    ...mapManuales(entradas.obligaciones, 'deduccion', 'obligacion'),
     ...mapManuales(entradas.anticipos, 'deduccion'),
     ...mapManuales(entradas.otrasDeducciones, 'deduccion'),
   ];

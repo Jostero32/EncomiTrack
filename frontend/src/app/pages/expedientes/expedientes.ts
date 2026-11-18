@@ -6,7 +6,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { apiErrorMessage } from '../../core/error.util';
 import {
@@ -28,6 +28,8 @@ export class ExpedientesComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly expedientes = signal<Expediente[]>([]);
   readonly activos = signal<Trabajador[]>([]);
@@ -56,12 +58,16 @@ export class ExpedientesComponent implements OnInit {
     causa: ['Renuncia voluntaria' as Causa, Validators.required],
     region: ['Sierra-Amazonía' as Region, Validators.required],
     decimosMensualizados: [false],
+    fondosReservaMensualizados: [false],
     responsable: [''],
     observaciones: [''],
   });
 
   ngOnInit(): void {
     this.load();
+    // "Iniciar salida" desde el detalle del trabajador: /expedientes?nuevo=<id>
+    const nuevo = Number(this.route.snapshot.queryParamMap.get('nuevo'));
+    if (nuevo > 0) this.openCreate(nuevo);
   }
 
   load(): void {
@@ -71,7 +77,7 @@ export class ExpedientesComponent implements OnInit {
     });
   }
 
-  openCreate(): void {
+  openCreate(trabajadorId?: number): void {
     this.api.getTrabajadores().subscribe({
       next: (list) => {
         this.activos.set(list.filter((t) => t.estado === 'Activo'));
@@ -82,9 +88,14 @@ export class ExpedientesComponent implements OnInit {
           causa: 'Renuncia voluntaria',
           region: 'Sierra-Amazonía',
           decimosMensualizados: false,
+          fondosReservaMensualizados: false,
           responsable: '',
           observaciones: '',
         });
+        if (trabajadorId && this.activos().some((t) => t.id === trabajadorId)) {
+          this.form.controls.trabajadorId.setValue(trabajadorId);
+          this.onTrabajadorChange();
+        }
         this.showForm.set(true);
       },
       error: (err) => this.toast.error(apiErrorMessage(err)),
@@ -114,14 +125,15 @@ export class ExpedientesComponent implements OnInit {
         causa: raw.causa,
         region: raw.region,
         decimosMensualizados: raw.decimosMensualizados,
+        fondosReservaMensualizados: raw.fondosReservaMensualizados,
         responsable: raw.responsable || null,
         observaciones: raw.observaciones || null,
       })
       .subscribe({
-        next: () => {
-          this.toast.success('Expediente creado');
+        next: (e) => {
+          this.toast.success(`Expediente ${e.numero} creado`);
           this.showForm.set(false);
-          this.load();
+          this.router.navigate(['/expedientes', e.id], { queryParams: { tab: 'paz' } });
         },
         error: (err) => this.toast.error(apiErrorMessage(err)),
       });

@@ -5,7 +5,7 @@
   </button>
 </div>
 
-<div class="card border-0 shadow-sm" style="max-width: 720px">
+<div class="card border-0 shadow-sm mb-4" style="max-width: 720px">
   <div class="card-header bg-white fw-semibold">Datos de la empresa</div>
   <div class="card-body">
     @if (loading()) {
@@ -24,14 +24,145 @@
           <label class="form-label">Dirección</label>
           <input class="form-control" formControlName="direccion" />
         </div>
-        <div class="mb-3">
-          <label class="form-label">Representante</label>
-          <input class="form-control" formControlName="representante" />
+        <div class="row g-3 mb-3">
+          <div class="col-sm-8">
+            <label class="form-label" for="emp-representante">Representante</label>
+            <input id="emp-representante" class="form-control" formControlName="representante" />
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label" for="emp-ciudad">Ciudad</label>
+            <input id="emp-ciudad" class="form-control" formControlName="ciudad" placeholder="Ambato" />
+          </div>
+        </div>
+        <div class="mb-1 fw-semibold small">Firmantes de la liquidación</div>
+        <div class="row g-3 mb-3">
+          <div class="col-sm-4">
+            <fieldset>
+              <legend class="form-label small fw-semibold mb-1">Elaborado por</legend>
+              <label class="visually-hidden" for="emp-elaboradoNombre">Elaborado por: nombre</label>
+              <input id="emp-elaboradoNombre" class="form-control form-control-sm mb-1" formControlName="elaboradoNombre" placeholder="Nombre" />
+              <label class="visually-hidden" for="emp-elaboradoCargo">Elaborado por: cargo</label>
+              <input id="emp-elaboradoCargo" class="form-control form-control-sm" formControlName="elaboradoCargo" placeholder="Cargo" />
+            </fieldset>
+          </div>
+          <div class="col-sm-4">
+            <fieldset>
+              <legend class="form-label small fw-semibold mb-1">Revisado por</legend>
+              <label class="visually-hidden" for="emp-revisadoNombre">Revisado por: nombre</label>
+              <input id="emp-revisadoNombre" class="form-control form-control-sm mb-1" formControlName="revisadoNombre" placeholder="Nombre" />
+              <label class="visually-hidden" for="emp-revisadoCargo">Revisado por: cargo</label>
+              <input id="emp-revisadoCargo" class="form-control form-control-sm" formControlName="revisadoCargo" placeholder="Cargo" />
+            </fieldset>
+          </div>
+          <div class="col-sm-4">
+            <fieldset>
+              <legend class="form-label small fw-semibold mb-1">Aprobado por</legend>
+              <label class="visually-hidden" for="emp-aprobadoNombre">Aprobado por: nombre</label>
+              <input id="emp-aprobadoNombre" class="form-control form-control-sm mb-1" formControlName="aprobadoNombre" placeholder="Nombre" />
+              <label class="visually-hidden" for="emp-aprobadoCargo">Aprobado por: cargo</label>
+              <input id="emp-aprobadoCargo" class="form-control form-control-sm" formControlName="aprobadoCargo" placeholder="Cargo" />
+            </fieldset>
+          </div>
         </div>
         <button type="submit" class="btn btn-primary" [disabled]="saving()">
           Guardar
         </button>
       </form>
     }
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div>
+      <span class="fw-semibold">Plantilla del paz y salvo</span>
+      <div class="small text-muted">
+        Se copia a cada expediente nuevo, junto con los bienes asignados y las obligaciones
+        pendientes del trabajador.
+      </div>
+    </div>
+    <button type="button" class="btn btn-sm btn-primary" (click)="agregarFila()">
+      <i class="bi bi-plus-lg me-1"></i>Agregar pregunta
+    </button>
+  </div>
+  <datalist id="deptos-plantilla">
+    @for (d of sugerenciasDepto; track d) {
+      <option [value]="d"></option>
+    }
+  </datalist>
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Orden</th>
+          <th>Departamento</th>
+          <th>Pregunta</th>
+          <th>Esperada</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of plantilla(); track $index; let i = $index) {
+          <tr>
+            <td class="plantilla-orden">
+              <input
+                type="number"
+                min="0"
+                class="form-control form-control-sm"
+                [value]="p.orden"
+                (change)="updateFila(i, 'orden', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                list="deptos-plantilla"
+                [value]="p.departamento"
+                (input)="updateFila(i, 'departamento', $any($event.target).value)"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control form-control-sm"
+                [value]="p.pregunta"
+                (input)="updateFila(i, 'pregunta', $any($event.target).value)"
+              />
+            </td>
+            <td class="plantilla-esperada">
+              <select
+                class="form-select form-select-sm"
+                [value]="p.respuestaEsperada"
+                (change)="updateFila(i, 'respuestaEsperada', $any($event.target).value)"
+              >
+                <option value="SI">SÍ</option>
+                <option value="NO">NO</option>
+              </select>
+            </td>
+            <td class="text-end text-nowrap">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary me-1"
+                title="Guardar"
+                (click)="guardarFila(i)"
+              >
+                <i class="bi bi-check-lg"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                title="Eliminar"
+                (click)="eliminarFila(i)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Plantilla vacía</td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
 </div>

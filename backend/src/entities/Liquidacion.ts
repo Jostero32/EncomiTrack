@@ -13,11 +13,20 @@ export type RubroLiquidacion = {
   tipo: 'haber' | 'deduccion';
   valor: string;
   formula: string;
-  origen: 'auto' | 'manual';
+  origen: 'auto' | 'manual' | 'obligacion';
+  /** id de la Obligacion descontada (solo origen 'obligacion'). */
+  referenciaId?: number;
 };
 
 export type EntradasLiquidacion = {
+  /** Días usados en el cálculo (saldo de períodos completos o valor editado). */
   diasVacacionesPendientesAnteriores?: number;
+  /** Saldo calculado desde GET /trabajadores/:id/vacaciones. */
+  diasVacacionesCalculados?: number;
+  /** Días gozados imputados al período en curso (se restan del proporcional). */
+  diasGozadosPeriodoEnCurso?: number;
+  justificacionDiasVacaciones?: string | null;
+  observaciones?: string | null;
   otrosHaberes?: Array<{
     concepto: string;
     valor: number | string;
@@ -77,9 +86,16 @@ export class Liquidacion {
   })
   neto!: string;
 
+  @Column({ type: 'text', nullable: true })
+  observaciones!: string | null;
+
   @Column({ type: 'boolean', default: false })
   confirmada!: boolean;
 
   @Column({ type: 'datetime', nullable: true })
   fechaConfirmacion!: Date | null;
+
+  /** true si cambiaron deudas, vacaciones o datos del trabajador después de calcularla. */
+  @Column({ type: 'boolean', default: false })
+  desactualizada!: boolean;
 }

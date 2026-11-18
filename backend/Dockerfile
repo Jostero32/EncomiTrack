@@ -17,6 +17,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV DB_PATH=/data/app.db
+ENV UPLOADS_DIR=/data/uploads
 ENV PORT=3000
 
 COPY package*.json ./

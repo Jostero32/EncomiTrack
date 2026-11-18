@@ -1,5 +1,327 @@
 .neto-highlight {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f5132;
+  color: var(--et-verde);
+}
+
+/* ---- Paz y salvo: pasos por área ---- */
+.pasos-ps .nav-link {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--bs-border-color);
+  background: #fff;
+  color: #212529;
+}
+
+.pasos-ps .nav-link.active {
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+.paso-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.nav-link.active .paso-num {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.paso-check {
+  color: var(--et-verde);
+}
+
+.nav-link.active .paso-check {
+  color: #fff;
+}
+
+/* ---- Paz y salvo: tabla de requisitos ---- */
+.origen-plantilla {
+  --origen-color: #6c757d;
+  --origen-bg: #e9ecef;
+  --origen-fg: #343a40;
+}
+
+.origen-bien {
+  --origen-color: var(--et-azul);
+  --origen-bg: var(--et-azul-suave);
+  --origen-fg: var(--et-azul-oscuro);
+}
+
+.origen-obligacion {
+  --origen-color: var(--et-dorado);
+  --origen-bg: var(--et-dorado-suave);
+  --origen-fg: var(--et-dorado-texto);
+}
+
+.tabla-ps tbody tr > td:first-child {
+  border-left: 4px solid var(--origen-color);
+}
+
+.tabla-ps .col-pregunta {
+  width: 60%;
+}
+
+.icono-origen {
+  color: var(--origen-color);
+  line-height: 1.2;
+}
+
+.badge-origen {
+  background: var(--origen-bg);
+  color: var(--origen-fg);
+  font-weight: 600;
+}
+
+/* Botones SÍ / NO / N/A: texto oscuro sin seleccionar (contraste ≥ 4.5:1). */
+/* Ancho fijo para que el ícono de la opción elegida no mueva el grupo. */
+.btn-resp {
+  min-width: 4.25rem;
+  min-height: 2rem;
+}
+
+.btn-resp.btn-outline-secondary {
+  color: #343a40;
+  border-color: #6c757d;
+}
+
+.btn-resp.btn-outline-secondary:hover:not(:disabled) {
+  color: #fff;
+}
+
+.col-evidencia.drop-activo {
+  outline: 2px dashed var(--bs-primary);
+  outline-offset: -4px;
+  background: var(--et-azul-suave);
+}
+
+.hint-drop {
+  font-size: 0.7rem;
+}
+
+/* En pantallas angostas cada fila pasa a una tarjeta apilada. */
+@media (max-width: 767.98px) {
+  .tabla-ps thead {
+    display: none;
+  }
+
+  .tabla-ps,
+  .tabla-ps tbody,
+  .tabla-ps tr,
+  .tabla-ps td {
+    display: block;
+    width: 100% !important;
+  }
+
+  .tabla-ps tbody tr {
+    border-left: 4px solid var(--origen-color);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tabla-ps tbody tr > td:first-child {
+    border-left: 0;
+  }
+
+  .tabla-ps td {
+    border: 0;
+    padding: 0.25rem 0;
+    text-align: left !important;
+  }
+
+  .tabla-ps td.col-evidencia,
+  .tabla-ps td.col-acciones {
+    display: inline-block;
+    width: auto !important;
+    margin-right: 0.5rem;
+  }
+}
+
+/* ---- Barra de progreso del proceso ---- */
+.paso-proceso {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--bs-border-color);
+  background: #fff;
+  color: #495057;
+  font-size: 0.875rem;
+}
+
+.paso-proceso.completo {
+  border-color: #a3cfbb;
+  background: #d1e7dd;
+  color: #0a3622;
+}
+
+.paso-proceso.actual {
+  border-color: var(--bs-primary);
+  background: var(--et-azul-suave);
+  color: var(--et-azul-oscuro);
+  font-weight: 600;
+}
+
+/* ---- Documentos ---- */
+.seccion-titulo {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.doc-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  border-radius: 0.6rem;
+  background: var(--et-azul-suave);
+  color: var(--et-azul);
+  font-size: 1.25rem;
+}
+
+.doc-bloqueado .doc-icono {
+  background: #f1efec;
+  color: var(--et-gris);
+}
+
+.faltantes {
+  background: var(--et-dorado-suave);
+  border-color: #f0dc9a !important;
+}
+
+.faltante {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #e9d38a;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.zona-drop {
+  padding: 1.25rem;
+  border: 2px dashed var(--et-borde);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--et-gris);
+  text-align: center;
+}
+
+.zona-drop.activa {
+  border-color: var(--et-azul);
+  background: var(--et-azul-suave);
+  color: var(--et-azul);
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* ---- Liquidación ---- */
+.tabla-liq .grupo th {
+  padding-top: 0.75rem;
+  background: #f6f3f0;
+  color: var(--et-gris);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tabla-liq .formula {
+  color: var(--et-gris);
+  font-size: 0.78rem;
+}
+
+.tabla-liq .valor {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.tabla-liq .rubro-cero {
+  opacity: 0.55;
+}
+
+.tabla-liq .subtotal th,
+.tabla-liq .subtotal td {
+  font-weight: 600;
+  border-top: 1px solid var(--et-borde);
+}
+
+.tabla-liq .neto-fila th,
+.tabla-liq .neto-fila td {
+  background: var(--et-azul-suave);
+  color: var(--et-azul);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.deduccion {
+  color: var(--et-rojo);
+}
+
+.badge-deuda {
+  background: var(--et-dorado-suave);
+  color: var(--et-dorado-texto);
+}
+
+.ajuste,
+.ajuste-fijo {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--et-borde);
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.ajuste {
+  margin-bottom: 0.5rem;
+}
+
+.ajuste summary {
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+}
+
+.ajuste summary::-webkit-details-marker {
+  display: none;
+}
+
+.ajuste .chevron {
+  display: inline-block;
+  transition: transform 0.15s;
+}
+
+.ajuste[open] .chevron {
+  transform: rotate(90deg);
+}
+
+.resumen-liq {
+  position: sticky;
+  top: 1rem;
+  overflow: hidden;
+}
+
+.valores-unitarios th,
+.valores-unitarios td {
+  font-variant-numeric: tabular-nums;
+}
+
+.neto-caja {
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  background: var(--et-azul);
+  color: #fff;
+}
+
+.neto-valor {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
 }

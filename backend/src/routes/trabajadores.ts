@@ -3,9 +3,11 @@ import { Like } from 'typeorm';
 import { z } from 'zod';
 import { AppDataSource } from '../data-source';
 import { Expediente } from '../entities/Expediente';
-import { Trabajador } from '../entities/Trabajador';
+import { TIPOS_VINCULO, Trabajador } from '../entities/Trabajador';
 import { conflict, notFound } from '../errors';
 import { asyncHandler } from '../middleware';
+import { expedienteAbierto, sincronizarDatosLaborales } from '../sync-expediente';
+import { remuneracionSchema } from '../validaciones';
 
 const router = Router();
 const repo = () => AppDataSource.getRepository(Trabajador);
@@ -17,8 +19,11 @@ const trabajadorSchema = z.object({
   apellidos: z.string().min(1),
   cargo: z.string().min(1),
   departamento: z.string().min(1),
+  tipoVinculo: z.enum(TIPOS_VINCULO).optional().default('Código de Trabajo'),
+  unidad: z.string().optional().nullable(),
+  jefeInmediato: z.string().optional().nullable(),
   fechaIngreso: z.string().min(1),
-  remuneracion: z.union([z.string(), z.number()]),
+  remuneracion: remuneracionSchema,
   estado: z.enum(['Activo', 'Finalizado']).optional().default('Activo'),
 });
 
@@ -95,15 +100,29 @@ router.put(
       const dup = await repo().findOne({ where: { cedula: data.cedula } });
       if (dup) throw conflict('Cédula duplicada');
     }
+    const antes = {
+      remuneracion: trabajador.remuneracion,
+      cargo: trabajador.cargo,
+      fechaIngreso: trabajador.fechaIngreso,
+    };
     Object.assign(trabajador, {
       ...data,
       remuneracion:
         data.remuneracion !== undefined
-          ? String(data.remuneracion)
+          ? Number(data.remuneracion).toFixed(2)
           : trabajador.remuneracion,
     });
-    const saved = await repo().save(trabajador);
-    res.json(saved);
+    const out = await AppDataSource.transaction(async (m) => {
+      const exp = await expedienteAbierto(m, trabajador.id);
+      const aviso = await sincronizarDatosLaborales(m, exp, antes, {
+        remuneracion: Number(trabajador.remuneracion).toFixed(2),
+        cargo: trabajador.cargo,
+        fechaIngreso: trabajador.fechaIngreso,
+      });
+      const saved = await m.save(trabajador);
+      return aviso ? { ...saved, avisoExpediente: aviso } : saved;
+    });
+    res.json(out);
   }),
 );
 

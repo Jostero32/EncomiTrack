@@ -16,4 +16,26 @@ export class Empresa {
 
   @Column({ type: 'varchar' })
   representante!: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  ciudad!: string | null;
+
+  /** Firmantes de la liquidación: Elaborado / Revisado / Aprobado. */
+  @Column({ type: 'varchar', nullable: true })
+  elaboradoNombre!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  elaboradoCargo!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  revisadoNombre!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  revisadoCargo!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  aprobadoNombre!: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  aprobadoCargo!: string | null;
 }

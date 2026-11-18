@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { In } from 'typeorm';
 import { z } from 'zod';
 import { calcularLiquidacion } from '../calculos';
 import { AppDataSource } from '../data-source';
@@ -7,8 +8,10 @@ import {
   EntradasLiquidacion,
   Liquidacion,
 } from '../entities/Liquidacion';
-import { badRequest, forbidden, notFound } from '../errors';
+import { ESTADOS_DEUDA_VIGENTE, Obligacion } from '../entities/Obligacion';
+import { badRequest, conflict, forbidden, notFound } from '../errors';
 import { asyncHandler } from '../middleware';
+import { obtenerVacaciones } from '../vacaciones';
 
 const router = Router({ mergeParams: true });
 
@@ -22,7 +25,10 @@ const manualItemSchema = z.object({
 });
 
 const entradasSchema = z.object({
-  diasVacacionesPendientesAnteriores: z.number().min(0).optional().default(0),
+  /** Si se omite (o es null) se usa el saldo de períodos completos de vacaciones. */
+  diasVacacionesPendientesAnteriores: z.number().min(0).optional().nullable(),
+  justificacionDiasVacaciones: z.string().optional().nullable(),
+  observaciones: z.string().optional().nullable(),
   otrosHaberes: z.array(manualItemSchema).optional().default([]),
   anticipos: z.array(manualItemSchema).optional().default([]),
   otrasDeducciones: z.array(manualItemSchema).optional().default([]),
@@ -49,7 +55,59 @@ function assertNotConfirmada(liquidacion: Liquidacion | null | undefined): void 
   }
 }
 
-function buildResult(
+/**
+ * Completa las entradas con el saldo de vacaciones calculado y valida que,
+ * si el usuario lo edita, exista una justificación.
+ */
+async function prepararEntradas(
+  expediente: Expediente,
+  body: unknown,
+): Promise<EntradasLiquidacion> {
+  const parsed = entradasSchema.parse(body ?? {});
+  const vacaciones = await obtenerVacaciones(
+    expediente.trabajadorId,
+    expediente.fechaIngreso,
+    expediente.fechaSalida,
+  );
+  const calculados = vacaciones.saldoPeriodosCompletos;
+  const diasGozadosPeriodoEnCurso =
+    vacaciones.periodos.find((p) => !p.completo)?.diasGozados ?? 0;
+  const editado =
+    parsed.diasVacacionesPendientesAnteriores !== undefined &&
+    parsed.diasVacacionesPendientesAnteriores !== null &&
+    parsed.diasVacacionesPendientesAnteriores !== calculados;
+  const justificacion = parsed.justificacionDiasVacaciones?.trim() || null;
+  if (editado && !justificacion) {
+    throw badRequest(
+      `Justifique el cambio de días de vacaciones pendientes (saldo calculado: ${calculados})`,
+    );
+  }
+  return {
+    ...parsed,
+    diasVacacionesCalculados: calculados,
+    diasGozadosPeriodoEnCurso,
+    diasVacacionesPendientesAnteriores: editado
+      ? (parsed.diasVacacionesPendientesAnteriores as number)
+      : calculados,
+    justificacionDiasVacaciones: editado ? justificacion : null,
+    observaciones: parsed.observaciones?.trim() || null,
+  };
+}
+
+async function obligacionesPendientes(trabajadorId: number) {
+  const obligaciones = await AppDataSource.getRepository(Obligacion).find({
+    where: { trabajadorId, estado: In([...ESTADOS_DEUDA_VIGENTE]) },
+    order: { fecha: 'ASC', id: 'ASC' },
+  });
+  return obligaciones.map((o) => ({
+    referenciaId: o.id,
+    concepto: o.concepto,
+    valor: o.valor,
+    justificacion: o.justificacion?.trim() || `${o.tipo} pendiente (${o.fecha})`,
+  }));
+}
+
+async function buildResult(
   expediente: Expediente,
   entradas: EntradasLiquidacion,
 ) {
@@ -62,9 +120,12 @@ function buildResult(
     decimosMensualizados: expediente.decimosMensualizados,
     diasVacacionesPendientesAnteriores:
       entradas.diasVacacionesPendientesAnteriores ?? 0,
+    diasGozadosPeriodoEnCurso: entradas.diasGozadosPeriodoEnCurso ?? 0,
+    fondosReservaMensualizados: expediente.fondosReservaMensualizados,
     otrosHaberes: entradas.otrosHaberes,
     anticipos: entradas.anticipos,
     otrasDeducciones: entradas.otrasDeducciones,
+    obligaciones: await obligacionesPendientes(expediente.trabajadorId),
   });
 }
 
@@ -79,8 +140,8 @@ router.post(
     });
     assertNotConfirmada(liquidacion);
 
-    const entradas = entradasSchema.parse(req.body ?? {}) as EntradasLiquidacion;
-    const resultado = buildResult(expediente, entradas);
+    const entradas = await prepararEntradas(expediente, req.body);
+    const resultado = await buildResult(expediente, entradas);
 
     if (!liquidacion) {
       liquidacion = lRepo().create({
@@ -90,11 +151,15 @@ router.post(
         totalHaberes: resultado.totalHaberes,
         totalDeducciones: resultado.totalDeducciones,
         neto: resultado.neto,
+        observaciones: entradas.observaciones ?? null,
         confirmada: false,
         fechaConfirmacion: null,
+        desactualizada: false,
       });
     } else {
+      liquidacion.desactualizada = false;
       liquidacion.entradas = entradas;
+      liquidacion.observaciones = entradas.observaciones ?? null;
       liquidacion.rubros = resultado.rubros;
       liquidacion.totalHaberes = resultado.totalHaberes;
       liquidacion.totalDeducciones = resultado.totalDeducciones;
@@ -118,10 +183,12 @@ router.put(
     if (!liquidacion) throw notFound('Liquidación no encontrada');
     assertNotConfirmada(liquidacion);
 
-    const entradas = entradasSchema.parse(req.body ?? {}) as EntradasLiquidacion;
-    const resultado = buildResult(expediente, entradas);
+    const entradas = await prepararEntradas(expediente, req.body);
+    const resultado = await buildResult(expediente, entradas);
 
+    liquidacion.desactualizada = false;
     liquidacion.entradas = entradas;
+    liquidacion.observaciones = entradas.observaciones ?? null;
     liquidacion.rubros = resultado.rubros;
     liquidacion.totalHaberes = resultado.totalHaberes;
     liquidacion.totalDeducciones = resultado.totalDeducciones;
@@ -144,6 +211,11 @@ router.post(
     if (!liquidacion) throw notFound('Liquidación no encontrada');
     if (liquidacion.confirmada) {
       throw badRequest('La liquidación ya está confirmada');
+    }
+    if (liquidacion.desactualizada) {
+      throw conflict(
+        'La liquidación está desactualizada (cambiaron deudas, vacaciones o datos del trabajador): recalcúlela antes de confirmar',
+      );
     }
 
     liquidacion.confirmada = true;
