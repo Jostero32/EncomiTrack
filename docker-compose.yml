@@ -1,32 +1,39 @@
-# Despliegue local idéntico al de producción: todo bajo /liquidacion.
-#   App: http://localhost:8080/liquidacion/
-#   API: http://localhost:8080/liquidacion/api/health
-# Para servir en la raíz, cambie BASE_PATH a "" en los dos servicios.
+# Paz y Salvo y Liquidación (EncomiTrack): backend + frontend bajo BASE_PATH.
+# La configuración se lee de .env (copie .env.example a .env).
+#
+# No se publica ningún puerto en el equipo anfitrión (evita choques con otros
+# proyectos): los servicios solo se ven dentro de la red de Docker.
+#   - Probar en local:      docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+#   - Publicar con dominio: docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d --build
+name: ${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}
+
 services:
   backend:
     build:
       context: ./backend
     environment:
-      BASE_PATH: /liquidacion
+      BASE_PATH: ${BASE_PATH:-/liquidacion}
+      PORT: ${BACKEND_PORT:-3000}
       DB_PATH: /data/app.db
       UPLOADS_DIR: /data/uploads
-      PORT: 3000
+      TZ: ${TZ:-America/Guayaquil}
     volumes:
-      - ./data:/data
+      - ${DATA_DIR:-./data}:/data
     expose:
-      - "3000"
+      - "${BACKEND_PORT:-3000}"
     restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
       args:
-        BASE_PATH: /liquidacion
+        BASE_PATH: ${BASE_PATH:-/liquidacion}
     environment:
-      BASE_PATH: /liquidacion
-      BACKEND_URL: http://backend:3000
-    ports:
-      - "8080:80"
+      BASE_PATH: ${BASE_PATH:-/liquidacion}
+      LISTEN_PORT: ${FRONTEND_PORT:-8080}
+      BACKEND_URL: http://backend:${BACKEND_PORT:-3000}
+    expose:
+      - "${FRONTEND_PORT:-8080}"
     depends_on:
       - backend
     restart: unless-stopped

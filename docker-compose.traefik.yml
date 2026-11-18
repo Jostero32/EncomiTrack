@@ -1,0 +1,37 @@
+# Publicación con dominio a través de un Traefik que ya existe en el servidor
+# (por ejemplo el de Dokploy, en la red "dokploy-network").
+#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d --build
+#
+# Enruta https://DOMAIN/BASE_PATH/api -> backend y https://DOMAIN/BASE_PATH -> frontend,
+# sin quitar el prefijo (las apps ya lo esperan). No publica puertos en el anfitrión.
+services:
+  backend:
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-dokploy-network}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api.rule=Host(`${DOMAIN}`) && PathPrefix(`${BASE_PATH:-/liquidacion}/api`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api.service=${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-api.loadbalancer.server.port=${BACKEND_PORT:-3000}
+
+  frontend:
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-dokploy-network}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web.rule=Host(`${DOMAIN}`) && PathPrefix(`${BASE_PATH:-/liquidacion}`)
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.routers.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web.service=${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web
+      - traefik.http.services.${COMPOSE_PROJECT_NAME:-paz-salvo-liquidacion}-web.loadbalancer.server.port=${FRONTEND_PORT:-8080}
+
+networks:
+  proxy:
+    name: ${TRAEFIK_NETWORK:-dokploy-network}
+    external: true

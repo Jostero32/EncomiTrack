@@ -6,3 +6,4 @@ dist
 data
 uploads
 npm-debug.log
+.env

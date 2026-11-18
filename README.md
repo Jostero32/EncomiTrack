@@ -4,23 +4,27 @@ Aplicación para gestionar el paz y salvo y la liquidación laboral (EncomiTrack
 Se publica bajo la subruta **`/liquidacion`**: la app en `/liquidacion/` y la API
 en `/liquidacion/api/`.
 
-## Docker (local, igual que producción)
+## Docker compose
 
-```bash
-docker compose up --build
-```
+La configuración está en `.env` (copie `.env.example`). `docker-compose.yml`
+**no publica puertos** en el equipo anfitrión, para no chocar con otros proyectos:
+los contenedores solo se ven dentro de la red de Docker.
 
-- App: <http://localhost:8080/liquidacion/> (`/` redirige ahí)
-- API: <http://localhost:8080/liquidacion/api/health>
-- Datos: carpeta `./data` (base SQLite `app.db` y archivos en `uploads/`)
+| Uso | Comando |
+|---|---|
+| Solo red interna | `docker compose up -d --build` |
+| Probar en su PC | `docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build` → <http://localhost:8080/liquidacion/> (solo en 127.0.0.1, puerto `LOCAL_PORT`) |
+| Con dominio vía Traefik existente | `docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d --build` → `https://DOMAIN/liquidacion/` |
 
-Para servir en la raíz, ponga `BASE_PATH: ""` en los dos servicios de
-`docker-compose.yml` (y en el `args` del frontend).
+- Datos: carpeta `DATA_DIR` (por defecto `./data`): base SQLite `app.db` y `uploads/`.
+- Puertos internos: backend `BACKEND_PORT` (3000), frontend `FRONTEND_PORT` (8080).
+- Para servir en la raíz: `BASE_PATH=` (vacío) en `.env`.
 
 ## Despliegue en Dokploy (dos aplicaciones con Dockerfile)
 
 Igual que el sistema de nómina: la ruta se configura **sin "Strip Path"**, porque
-cada contenedor ya atiende las rutas con el prefijo `/liquidacion`.
+cada contenedor ya atiende las rutas con el prefijo `/liquidacion`. Las variables
+de cada aplicación están en `backend/.env.example` y `frontend/.env.example`.
 
 ### 1. Backend (API)
 
@@ -43,7 +47,7 @@ Comprobar: `https://su-dominio.com/liquidacion/api/health` → `{"ok":true}`
 | Docker file | `frontend/Dockerfile` |
 | Docker context path | `frontend` |
 | Build args | `BASE_PATH=/liquidacion` (ya es el valor por defecto) |
-| Dominio | `su-dominio.com`, **Path `/liquidacion`**, puerto `80`, Strip Path **desactivado** |
+| Dominio | `su-dominio.com`, **Path `/liquidacion`**, puerto `8080`, Strip Path **desactivado** |
 
 Traefik envía `/liquidacion/api/...` al backend (ruta más específica) y el resto
 de `/liquidacion/...` al frontend. Comprobar: `https://su-dominio.com/liquidacion/`.

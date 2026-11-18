@@ -19,11 +19,13 @@ RUN npx ng build --configuration production --base-href "${BASE_PATH%/}/"
 FROM nginx:1.27-alpine
 ARG BASE_PATH
 
+# LISTEN_PORT: puerto interno de nginx (no se publica en el equipo anfitrión).
 # BACKEND_URL: dónde está la API para el proxy interno de nginx (docker compose o
 # misma red de Docker). Si el dominio enruta <BASE_PATH>/api directo al backend
 # (dos aplicaciones en Dokploy), este proxy no se usa.
 ENV BASE_PATH=${BASE_PATH} \
-    BACKEND_URL=http://backend:3000
+    BACKEND_URL=http://backend:3000 \
+    LISTEN_PORT=8080
 
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html${BASE_PATH}
 COPY nginx-config.sh /docker-entrypoint.d/40-config-subruta.sh
@@ -32,7 +34,7 @@ RUN sed -i 's/\r$//' /docker-entrypoint.d/40-config-subruta.sh \
     && chmod +x /docker-entrypoint.d/40-config-subruta.sh \
     && rm -f /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -q -O /dev/null "http://127.0.0.1${BASE_PATH%/}/" || exit 1
+    CMD wget -q -O /dev/null "http://127.0.0.1:${LISTEN_PORT}${BASE_PATH%/}/" || exit 1

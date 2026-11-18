@@ -5,6 +5,7 @@
 set -e
 
 BASE="${BASE_PATH%/}"
+PUERTO="${LISTEN_PORT:-8080}"
 BACKEND="${BACKEND_URL:-http://backend:3000}"
 BACKEND="${BACKEND%/}"
 
@@ -17,7 +18,7 @@ fi
 
 cat > /etc/nginx/conf.d/default.conf <<EOF
 server {
-    listen 80;
+    listen $PUERTO;
     server_name _;
     root /usr/share/nginx/html;
 
@@ -62,4 +63,4 @@ $REDIRECCIONES
 }
 EOF
 
-echo "[subruta] nginx en '${BASE:-/}' · API -> $BACKEND"
+echo "[subruta] nginx en :$PUERTO${BASE:-/} · API -> $BACKEND"
