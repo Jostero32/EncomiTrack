@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.db
+*.db-*
+dist/
+.next/
+.angular/
+*.tsbuildinfo
+.DS_Store
