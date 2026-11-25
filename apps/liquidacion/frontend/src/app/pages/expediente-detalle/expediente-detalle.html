@@ -1,0 +1,1286 @@
+@if (loading()) {
+  <div class="text-muted">Cargando expediente…</div>
+} @else if (expediente(); as e) {
+  <div class="d-flex flex-wrap gap-2 justify-content-between align-items-start mb-3">
+    <div>
+      <a routerLink="/expedientes" class="small text-decoration-none"
+        ><i class="bi bi-arrow-left"></i> Volver</a
+      >
+      <h2 class="h4 mb-1">{{ e.numero }}</h2>
+      <div class="text-muted">
+        {{ e.trabajador?.nombres }} {{ e.trabajador?.apellidos }}
+        <span class="badge ms-2 {{ badgeClass(e.estado) }}">{{ e.estado }}</span>
+      </div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      @if (soloLectura) {
+        <span class="badge text-bg-secondary">Solo lectura</span>
+      }
+      @if (siguienteAccion(); as a) {
+        <button type="button" class="btn {{ a.clase }}" (click)="ejecutarSiguiente(a.clave)">
+          <i class="bi {{ a.icono }} me-1" aria-hidden="true"></i>{{ a.texto }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <ol class="pasos-proceso list-unstyled d-flex flex-wrap gap-2 mb-3" aria-label="Progreso del expediente">
+    @for (p of pasosProceso(); track p.nombre; let i = $index) {
+      <li
+        class="paso-proceso"
+        [class.completo]="p.estado === 'completo'"
+        [class.actual]="p.estado === 'actual'"
+        [attr.aria-current]="p.estado === 'actual' ? 'step' : null"
+      >
+        <i
+          class="bi {{ p.estado === 'completo' ? 'bi-check-circle-fill' : p.estado === 'actual' ? 'bi-record-circle' : 'bi-circle' }} me-1"
+          aria-hidden="true"
+        ></i>
+        {{ p.nombre }}
+        <span class="visually-hidden">
+          ({{ p.estado === 'completo' ? 'completo' : p.estado === 'actual' ? 'paso actual' : 'pendiente' }})
+        </span>
+      </li>
+    }
+  </ol>
+
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'general'"
+        (click)="setTab('general')"
+      >
+        General
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'paz'"
+        (click)="setTab('paz')"
+      >
+        Paz y salvo
+        @if (pendientesPaz(); as n) {
+          <span class="badge rounded-pill text-bg-warning ms-1">{{ n }}<span class="visually-hidden"> pendientes</span></span>
+        }
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'liq'"
+        (click)="setTab('liq')"
+      >
+        Liquidación
+        @if (liquidacionPendiente()) {
+          <span class="badge rounded-pill text-bg-warning ms-1">!<span class="visually-hidden"> pendiente de confirmar</span></span>
+        }
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'docs'"
+        (click)="setTab('docs')"
+      >
+        Documentos
+        @if (faltantes().length && !soloLectura) {
+          <span class="badge rounded-pill text-bg-light border ms-1" [title]="faltantes().length + ' documentos sugeridos faltan'">{{ faltantes().length }}<span class="visually-hidden"> documentos sugeridos faltan</span></span>
+        }
+      </button>
+    </li>
+  </ul>
+
+  @if (tab() === 'general') {
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white fw-semibold">Trabajador</div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Nombre</dt>
+              <dd class="col-sm-8">{{ e.trabajador?.nombres }} {{ e.trabajador?.apellidos }}</dd>
+              <dt class="col-sm-4">Cédula</dt>
+              <dd class="col-sm-8">{{ e.trabajador?.cedula }}</dd>
+              <dt class="col-sm-4">Cargo</dt>
+              <dd class="col-sm-8">{{ e.cargo }}</dd>
+              <dt class="col-sm-4">Departamento</dt>
+              <dd class="col-sm-8">{{ e.trabajador?.departamento }}</dd>
+              <dt class="col-sm-4">Remuneración</dt>
+              <dd class="col-sm-8">
+                {{ e.remuneracion | currency: 'USD':'symbol':'1.2-2':'es-EC' }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header bg-white fw-semibold">Terminación</div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Ingreso</dt>
+              <dd class="col-sm-8">{{ e.fechaIngreso | date: 'dd/MM/yyyy' }}</dd>
+              <dt class="col-sm-4">Salida</dt>
+              <dd class="col-sm-8">{{ e.fechaSalida | date: 'dd/MM/yyyy' }}</dd>
+              <dt class="col-sm-4">Causa</dt>
+              <dd class="col-sm-8">{{ e.causa }}</dd>
+              <dt class="col-sm-4">Región</dt>
+              <dd class="col-sm-8">{{ e.region }}</dd>
+              <dt class="col-sm-4">Décimos</dt>
+              <dd class="col-sm-8">
+                {{ e.decimosMensualizados ? 'Mensualizados' : 'Acumulados' }}
+              </dd>
+              <dt class="col-sm-4">Responsable</dt>
+              <dd class="col-sm-8">{{ e.responsable || '—' }}</dd>
+              <dt class="col-sm-4">Observaciones</dt>
+              <dd class="col-sm-8">{{ e.observaciones || '—' }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'paz') {
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body py-3">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">
+            Requisitos cumplidos: {{ requisitosAprobados }}/{{ totalRequisitos }}
+            <span class="text-muted fw-normal small ms-2">
+              · Áreas certificadas: {{ areasCertificadas() }}/{{ grupos().length }}
+            </span>
+          </div>
+          @if (pazSalvoEditable) {
+            <button type="button" class="btn btn-sm btn-link text-decoration-none" (click)="pedirRegenerar()">
+              <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Regenerar requisitos
+            </button>
+          } @else if (puedeReabrirPazSalvo) {
+            <button type="button" class="btn btn-sm btn-outline-warning text-dark" (click)="pedirReabrir()">
+              <i class="bi bi-unlock me-1" aria-hidden="true"></i>Reabrir paz y salvo
+            </button>
+          }
+        </div>
+        <div
+          class="progress"
+          style="height: 8px"
+          role="progressbar"
+          aria-label="Avance del paz y salvo"
+          [attr.aria-valuenow]="requisitosAprobados"
+          aria-valuemin="0"
+          [attr.aria-valuemax]="totalRequisitos"
+        >
+          <div
+            class="progress-bar"
+            [class.bg-success]="todosAprobados"
+            [style.width.%]="totalRequisitos ? (requisitosAprobados / totalRequisitos) * 100 : 0"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    @if (grupos().length) {
+      <nav aria-label="Áreas del paz y salvo" class="mb-3">
+        <ul class="nav nav-pills flex-nowrap overflow-auto gap-1 pb-1 pasos-ps">
+          @for (g of grupos(); track g.departamento; let i = $index) {
+            <li class="nav-item">
+              <button
+                type="button"
+                class="nav-link text-nowrap d-flex align-items-center gap-2"
+                [class.active]="i === areaIdx()"
+                [attr.aria-current]="i === areaIdx() ? 'step' : null"
+                (click)="irArea(i)"
+              >
+                <span class="paso-num">{{ i + 1 }}</span>
+                <span>{{ g.departamento }}</span>
+                <span class="small opacity-75">{{ g.cumplidos }}/{{ g.total }}</span>
+                @if (g.aprobacion) {
+                  <i class="bi bi-check-circle-fill paso-check" aria-hidden="true"></i>
+                  <span class="visually-hidden">(certificada)</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+
+    @if (areaActual(); as g) {
+      <section class="card border-0 shadow-sm mb-3" [attr.aria-labelledby]="'area-titulo'">
+        <div class="card-header bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <h3 id="area-titulo" class="h6 mb-0" tabindex="-1">
+            <span class="text-muted fw-normal">Paso {{ areaIdx() + 1 }} de {{ grupos().length }} ·</span>
+            {{ g.departamento }}
+          </h3>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <div class="progress" style="width: 8rem; height: 8px" aria-hidden="true">
+              <div
+                class="progress-bar"
+                [class.bg-success]="g.listo"
+                [style.width.%]="(g.cumplidos / g.total) * 100"
+              ></div>
+            </div>
+            <span class="small text-muted">{{ g.cumplidos }}/{{ g.total }} cumplen</span>
+            @switch (g.estado) {
+              @case ('Certificado') {
+                <span class="badge text-bg-success" [title]="'Certificado por ' + g.aprobacion?.responsable">
+                  <i class="bi bi-patch-check-fill me-1" aria-hidden="true"></i>Certificado
+                </span>
+              }
+              @case ('Listo para certificar') {
+                <span class="badge text-bg-warning">
+                  <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>Listo para certificar
+                </span>
+              }
+              @default {
+                <span class="badge text-bg-secondary">
+                  <i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>Pendiente
+                </span>
+              }
+            }
+            @if (areaEditable(g) && g.respondidos < g.total) {
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="marcarEsperado(g)">
+                <i class="bi bi-check2-all me-1" aria-hidden="true"></i>Marcar todo como esperado
+              </button>
+            }
+          </div>
+        </div>
+
+        <table class="table mb-0 align-middle tabla-ps">
+          <caption class="visually-hidden">Requisitos del área {{ g.departamento }}</caption>
+          <thead class="table-light">
+            <tr>
+              <th scope="col">Pregunta</th>
+              <th scope="col" class="text-center">Respuesta</th>
+              <th scope="col" class="text-center">Evidencia</th>
+              <th scope="col" class="text-end"><span class="visually-hidden">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of g.requisitos; track r.id) {
+              <tr [class]="'origen-' + r.origen.toLowerCase()">
+                <td class="col-pregunta">
+                  <div class="d-flex gap-2">
+                    <i class="bi {{ iconoOrigen(r) }} fs-5 icono-origen" aria-hidden="true"></i>
+                    <div>
+                      <div>
+                        {{ r.pregunta }}
+                        <span class="badge badge-origen ms-1">{{ etiquetaOrigen(r) }}</span>
+                      </div>
+                      @if (r.detalle; as d) {
+                        <div class="small text-muted">
+                          @if (d.origen === 'Bien') {
+                            {{ d.tipo }}
+                            @if (d.codigoSerie) { · Serie {{ d.codigoSerie }} }
+                            @if (d.fechaAsignacion) { · asignado el {{ d.fechaAsignacion | date: 'dd/MM/yyyy' }} }
+                            · {{ d.estado }}
+                          } @else {
+                            {{ d.tipo }} por {{ d.valor | currency: 'USD':'symbol':'1.2-2':'es-EC' }}
+                            · {{ d.fecha | date: 'dd/MM/yyyy' }} · {{ d.estado }}
+                            @if (d.estado === 'Por descontar') { (se descuenta en la liquidación) }
+                          }
+                        </div>
+                      }
+                      @if (r.observacion) {
+                        <div class="small text-body-secondary">
+                          <i class="bi bi-chat-left-text me-1" aria-hidden="true"></i>
+                          <span class="visually-hidden">Observación:</span>{{ r.observacion }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center col-respuesta" data-label="Respuesta">
+                  <div
+                    class="btn-group btn-group-sm"
+                    role="radiogroup"
+                    [attr.aria-label]="r.pregunta"
+                    (keydown)="onRadioKey($event)"
+                  >
+                    @for (op of opciones; track op) {
+                      <button
+                        type="button"
+                        role="radio"
+                        class="btn btn-resp"
+                        [class.btn-success]="r.respuesta === op && r.cumple"
+                        [class.btn-danger]="r.respuesta === op && !r.cumple"
+                        [class.btn-outline-secondary]="r.respuesta !== op"
+                        [attr.aria-checked]="r.respuesta === op"
+                        [attr.tabindex]="r.respuesta === op || (r.respuesta === null && op === 'SI') ? 0 : -1"
+                        [disabled]="!areaEditable(g)"
+                        (click)="responder(r, op)"
+                      >
+                        @if (r.respuesta === op) {
+                          <i class="bi {{ r.cumple ? 'bi-check-lg' : 'bi-x-lg' }} me-1" aria-hidden="true"></i>
+                        }
+                        {{ op === 'SI' ? 'SÍ' : op }}
+                      </button>
+                    }
+                  </div>
+                  <div class="small text-muted mt-1">
+                    esperado: {{ r.respuestaEsperada === 'SI' ? 'SÍ' : 'NO' }}
+                    @if (r.respuesta !== null) {
+                      <span class="visually-hidden">· {{ r.cumple ? 'cumple' : 'no cumple' }}</span>
+                    }
+                  </div>
+                </td>
+                <td
+                  class="text-center col-evidencia"
+                  data-label="Evidencia"
+                  [class.drop-activo]="dropRequisitoId() === r.id"
+                  (dragover)="onDragOver($event, r)"
+                  (dragleave)="dropRequisitoId.set(null)"
+                  (drop)="onDrop($event, r)"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary position-relative"
+                    [attr.aria-label]="'Evidencias de: ' + r.pregunta + ' (' + countDocsRequisito(r.id) + ' adjuntas)'"
+                    [disabled]="soloLectura && countDocsRequisito(r.id) === 0"
+                    (click)="openUpload(r.id)"
+                  >
+                    <i class="bi bi-paperclip" aria-hidden="true"></i>
+                    @if (countDocsRequisito(r.id) > 0) {
+                      <span class="badge text-bg-primary ms-1">{{ countDocsRequisito(r.id) }}</span>
+                    }
+                  </button>
+                  @if (!soloLectura) {
+                    <div class="small text-muted d-none d-md-block hint-drop">o arrastre aquí</div>
+                  }
+                </td>
+                <td class="text-end col-acciones">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [attr.aria-label]="(r.observacion ? 'Editar' : 'Agregar') + ' observación: ' + r.pregunta"
+                    [title]="r.observacion ? 'Editar observación' : 'Agregar observación'"
+                    [disabled]="!areaEditable(g)"
+                    (click)="editarObservacion(r)"
+                  >
+                    <i class="bi {{ r.observacion ? 'bi-pencil' : 'bi-chat-left-text' }}" aria-hidden="true"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <div class="card-footer bg-white">
+          @if (g.aprobacion; as a) {
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
+              <div>
+                <i class="bi bi-patch-check-fill text-success me-1" aria-hidden="true"></i>
+                Certificado por <strong>{{ a.responsable }}</strong>
+                @if (a.cargo) { ({{ a.cargo }}) }
+                el {{ a.fecha | date: 'dd/MM/yyyy HH:mm' }}
+              </div>
+              @if (pazSalvoEditable) {
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="pedirRevertir(g)">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Revertir certificación
+                </button>
+              }
+            </div>
+          } @else if (pazSalvoEditable) {
+            <div class="row g-2 align-items-end">
+              <div class="col-md-5">
+                <label class="form-label small mb-1" for="cert-responsable">Responsable del área</label>
+                <input
+                  id="cert-responsable"
+                  class="form-control form-control-sm"
+                  list="responsables-previos"
+                  autocomplete="off"
+                  [ngModel]="certForm().responsable"
+                  (ngModelChange)="setCert('responsable', $event)"
+                  [attr.aria-invalid]="certError() ? true : null"
+                  [attr.aria-describedby]="certError() ? 'cert-error' : null"
+                />
+                <datalist id="responsables-previos">
+                  @for (p of responsablesPrevios(); track p) {
+                    <option [value]="p"></option>
+                  }
+                </datalist>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small mb-1" for="cert-cargo">Cargo</label>
+                <input
+                  id="cert-cargo"
+                  class="form-control form-control-sm"
+                  list="cargos-previos"
+                  autocomplete="off"
+                  [ngModel]="certForm().cargo"
+                  (ngModelChange)="setCert('cargo', $event)"
+                />
+                <datalist id="cargos-previos">
+                  @for (p of cargosPrevios(); track p) {
+                    <option [value]="p"></option>
+                  }
+                </datalist>
+              </div>
+              <div class="col-md-3 d-grid">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-success"
+                  [disabled]="!g.listo"
+                  [title]="g.listo ? '' : 'Todos los ítems del área deben cumplir'"
+                  (click)="certificarArea(g)"
+                >
+                  <i class="bi bi-patch-check me-1" aria-hidden="true"></i>Certificar área
+                </button>
+              </div>
+              @if (certError(); as err) {
+                <div id="cert-error" class="col-12 small text-danger" role="alert">{{ err }}</div>
+              }
+              @if (!g.listo) {
+                <div class="col-12 small text-muted">
+                  Falta{{ g.total - g.cumplidos === 1 ? '' : 'n' }} {{ g.total - g.cumplidos }}
+                  ítem(s) por cumplir para certificar.
+                </div>
+              }
+            </div>
+          } @else {
+            <span class="text-muted small">Área sin certificar.</span>
+          }
+        </div>
+      </section>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          [disabled]="areaIdx() === 0"
+          (click)="irArea(areaIdx() - 1)"
+        >
+          <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Anterior
+        </button>
+        <span class="small text-muted d-none d-md-inline">Alt + ← / → para cambiar de área</span>
+        @if (areaIdx() < grupos().length - 1) {
+          <button type="button" class="btn btn-outline-primary" (click)="irArea(areaIdx() + 1)">
+            Siguiente<i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!pazSalvoEditable || areasCertificadas() < grupos().length"
+            [title]="areasCertificadas() < grupos().length ? 'Certifique todas las áreas' : ''"
+            (click)="aprobarPazSalvo()"
+          >
+            <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Aprobar paz y salvo
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-5">
+          <i class="bi bi-clipboard-x fs-2 d-block mb-2" aria-hidden="true"></i>
+          El expediente no tiene requisitos.
+          @if (pazSalvoEditable) {
+            <div class="mt-3">
+              <button type="button" class="btn btn-primary" (click)="pedirRegenerar()">
+                Generar requisitos desde la plantilla
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (tab() === 'liq') {
+    <div class="row g-3">
+      <!-- Columna principal -->
+      <div class="col-lg-8">
+        @if (e.liquidacion?.desactualizada && !e.liquidacion?.confirmada) {
+          <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <div class="flex-grow-1">
+              Cambiaron deudas, vacaciones o datos del trabajador después de calcular.
+              Recalcule antes de confirmar.
+            </div>
+          </div>
+        }
+
+        <div class="card mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="h6 mb-0">Detalle de la liquidación</h3>
+            @if (calculando()) {
+              <span class="small text-muted"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Recalculando…</span>
+            }
+          </div>
+          @if (e.liquidacion; as liq) {
+            <table class="table mb-0 align-middle tabla-liq">
+              <caption class="visually-hidden">Rubros de la liquidación</caption>
+              <tbody>
+                <tr class="grupo"><th colspan="2" scope="colgroup">Haberes</th></tr>
+                @for (r of haberes(liq); track $index) {
+                  <tr [class.rubro-cero]="esCero(r.valor)">
+                    <td>
+                      <div class="fw-medium">{{ r.concepto }}</div>
+                      <div class="formula">{{ r.formula }}</div>
+                    </td>
+                    <td class="text-end text-nowrap valor">{{ r.valor | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                  </tr>
+                }
+                <tr class="subtotal">
+                  <th scope="row">Total haberes</th>
+                  <td class="text-end">{{ liq.totalHaberes | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                </tr>
+                <tr class="grupo"><th colspan="2" scope="colgroup">Deducciones</th></tr>
+                @for (r of deducciones(liq); track $index) {
+                  <tr>
+                    <td>
+                      <div class="fw-medium">
+                        {{ r.concepto }}
+                        @if (r.origen === 'obligacion') {
+                          <span class="badge badge-deuda ms-1">Deuda</span>
+                        }
+                      </div>
+                      <div class="formula">{{ r.formula }}</div>
+                    </td>
+                    <td class="text-end text-nowrap valor deduccion">
+                      − {{ r.valor | currency: 'USD':'symbol':'1.2-2':'es-EC' }}
+                    </td>
+                  </tr>
+                }
+                <tr class="subtotal">
+                  <th scope="row">Total deducciones</th>
+                  <td class="text-end deduccion">− {{ liq.totalDeducciones | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                </tr>
+                <tr class="neto-fila">
+                  <th scope="row">Neto a recibir</th>
+                  <td class="text-end">{{ liq.neto | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          } @else {
+            <div class="card-body text-center py-5 text-muted">
+              <i class="bi bi-calculator fs-1 d-block mb-2" aria-hidden="true"></i>
+              Todavía no se calcula la liquidación.
+              @if (!soloLectura) {
+                <div class="mt-3">
+                  <button type="button" class="btn btn-primary" (click)="calcular()">
+                    <i class="bi bi-calculator me-1" aria-hidden="true"></i>Calcular ahora
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <form [formGroup]="liqForm" class="card mb-3">
+          <div class="card-header">
+            <h3 class="h6 mb-0">Ajustes</h3>
+            @if (!liqBloqueada && e.liquidacion) {
+              <div class="small text-muted">Los cambios se recalculan solos.</div>
+            }
+          </div>
+          <div class="card-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-5">
+                <label class="form-label" for="liq-dias">Días de vacaciones no gozadas</label>
+                <div class="input-group">
+                  <input
+                    id="liq-dias"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    class="form-control"
+                    formControlName="diasVacacionesPendientesAnteriores"
+                    [readonly]="liqBloqueada"
+                    aria-describedby="liq-dias-ayuda"
+                  />
+                  @if (diasVacacionesEditados && !liqBloqueada) {
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      aria-label="Usar saldo calculado"
+                      title="Usar saldo calculado"
+                      (click)="usarSaldoCalculado()"
+                    >
+                      <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
+                <div id="liq-dias-ayuda" class="form-text">
+                  @if (saldoVacaciones !== null) {
+                    Saldo de períodos completos al {{ e.fechaSalida | date: 'dd/MM/yyyy' }}:
+                    <strong>{{ saldoVacaciones | number: '1.0-2' }} días</strong>
+                    (<a [routerLink]="['/trabajadores', e.trabajadorId]">ver vacaciones</a>)
+                  } @else {
+                    Calculando saldo…
+                  }
+                </div>
+              </div>
+              @if (diasVacacionesEditados) {
+                <div class="col-md-7">
+                  <label class="form-label" for="liq-just">
+                    Justificación del cambio <span class="text-danger" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="liq-just"
+                    class="form-control"
+                    formControlName="justificacionDiasVacaciones"
+                    [readonly]="liqBloqueada"
+                    placeholder="Motivo por el que se modifica el saldo calculado"
+                  />
+                </div>
+              }
+            </div>
+
+            <div class="ajuste-fijo mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-medium">
+                  <i class="bi bi-cash-coin me-1 text-warning-emphasis" aria-hidden="true"></i>Deudas que se descuentan automáticamente
+                </span>
+                <a class="small" [routerLink]="['/trabajadores', e.trabajadorId]">Gestionar</a>
+              </div>
+              @if (obligacionesPendientes().length) {
+                <ul class="list-unstyled small mb-0">
+                  @for (o of obligacionesPendientes(); track o.id) {
+                    <li class="d-flex justify-content-between py-1 border-top">
+                      <span>{{ o.tipo }}: {{ o.concepto }} <span class="text-muted">· {{ o.estado }}</span></span>
+                      <strong class="tabular">{{ o.valor | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</strong>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <div class="small text-muted">Sin deudas pendientes.</div>
+              }
+            </div>
+
+            <details class="ajuste" [open]="otrosHaberes.length > 0">
+              <summary class="d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-chevron-right chevron me-1" aria-hidden="true"></i>Otros haberes
+                  @if (otrosHaberes.length) {
+                    <span class="badge rounded-pill text-bg-light border ms-1">{{ otrosHaberes.length }}</span>
+                  }
+                </span>
+              </summary>
+              <div formArrayName="otrosHaberes" class="pt-2">
+                @for (ctrl of otrosHaberes.controls; track $index; let i = $index) {
+                  <div class="row g-2 mb-2 align-items-start" [formGroupName]="i">
+                    <div class="col-sm-4">
+                      <label class="visually-hidden" [for]="'otrosHaberes-c-' + i">Concepto</label>
+                      <input [id]="'otrosHaberes-c-' + i" class="form-control form-control-sm" placeholder="Concepto" formControlName="concepto" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-2">
+                      <label class="visually-hidden" [for]="'otrosHaberes-v-' + i">Valor</label>
+                      <input [id]="'otrosHaberes-v-' + i" type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0,00" formControlName="valor" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-5">
+                      <label class="visually-hidden" [for]="'otrosHaberes-j-' + i">Justificación</label>
+                      <input [id]="'otrosHaberes-j-' + i" class="form-control form-control-sm" placeholder="Justificación" formControlName="justificacion" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-1 text-end">
+                      @if (!liqBloqueada) {
+                        <button type="button" class="btn btn-sm btn-outline-danger" aria-label="Quitar" title="Quitar" (click)="removeItem(otrosHaberes, i)">
+                          <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (!liqBloqueada) {
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="addItem(otrosHaberes)">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar
+                  </button>
+                } @else if (!otrosHaberes.length) {
+                  <div class="small text-muted">Sin registros.</div>
+                }
+              </div>
+            </details>
+            <details class="ajuste" [open]="anticipos.length > 0">
+              <summary class="d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-chevron-right chevron me-1" aria-hidden="true"></i>Anticipos (manuales)
+                  @if (anticipos.length) {
+                    <span class="badge rounded-pill text-bg-light border ms-1">{{ anticipos.length }}</span>
+                  }
+                </span>
+              </summary>
+              <div formArrayName="anticipos" class="pt-2">
+                @for (ctrl of anticipos.controls; track $index; let i = $index) {
+                  <div class="row g-2 mb-2 align-items-start" [formGroupName]="i">
+                    <div class="col-sm-4">
+                      <label class="visually-hidden" [for]="'anticipos-c-' + i">Concepto</label>
+                      <input [id]="'anticipos-c-' + i" class="form-control form-control-sm" placeholder="Concepto" formControlName="concepto" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-2">
+                      <label class="visually-hidden" [for]="'anticipos-v-' + i">Valor</label>
+                      <input [id]="'anticipos-v-' + i" type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0,00" formControlName="valor" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-5">
+                      <label class="visually-hidden" [for]="'anticipos-j-' + i">Justificación</label>
+                      <input [id]="'anticipos-j-' + i" class="form-control form-control-sm" placeholder="Justificación" formControlName="justificacion" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-1 text-end">
+                      @if (!liqBloqueada) {
+                        <button type="button" class="btn btn-sm btn-outline-danger" aria-label="Quitar" title="Quitar" (click)="removeItem(anticipos, i)">
+                          <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (!liqBloqueada) {
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="addItem(anticipos)">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar
+                  </button>
+                } @else if (!anticipos.length) {
+                  <div class="small text-muted">Sin registros.</div>
+                }
+              </div>
+            </details>
+            <details class="ajuste" [open]="otrasDeducciones.length > 0">
+              <summary class="d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-chevron-right chevron me-1" aria-hidden="true"></i>Otras deducciones
+                  @if (otrasDeducciones.length) {
+                    <span class="badge rounded-pill text-bg-light border ms-1">{{ otrasDeducciones.length }}</span>
+                  }
+                </span>
+              </summary>
+              <div formArrayName="otrasDeducciones" class="pt-2">
+                @for (ctrl of otrasDeducciones.controls; track $index; let i = $index) {
+                  <div class="row g-2 mb-2 align-items-start" [formGroupName]="i">
+                    <div class="col-sm-4">
+                      <label class="visually-hidden" [for]="'otrasDeducciones-c-' + i">Concepto</label>
+                      <input [id]="'otrasDeducciones-c-' + i" class="form-control form-control-sm" placeholder="Concepto" formControlName="concepto" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-2">
+                      <label class="visually-hidden" [for]="'otrasDeducciones-v-' + i">Valor</label>
+                      <input [id]="'otrasDeducciones-v-' + i" type="number" step="0.01" class="form-control form-control-sm text-end" placeholder="0,00" formControlName="valor" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-5">
+                      <label class="visually-hidden" [for]="'otrasDeducciones-j-' + i">Justificación</label>
+                      <input [id]="'otrasDeducciones-j-' + i" class="form-control form-control-sm" placeholder="Justificación" formControlName="justificacion" [readonly]="liqBloqueada" />
+                    </div>
+                    <div class="col-sm-1 text-end">
+                      @if (!liqBloqueada) {
+                        <button type="button" class="btn btn-sm btn-outline-danger" aria-label="Quitar" title="Quitar" (click)="removeItem(otrasDeducciones, i)">
+                          <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (!liqBloqueada) {
+                  <button type="button" class="btn btn-sm btn-outline-primary" (click)="addItem(otrasDeducciones)">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Agregar
+                  </button>
+                } @else if (!otrasDeducciones.length) {
+                  <div class="small text-muted">Sin registros.</div>
+                }
+              </div>
+            </details>
+
+            <div class="mt-3">
+              <label class="form-label" for="liq-obs">Observaciones</label>
+              <textarea
+                id="liq-obs"
+                class="form-control"
+                rows="2"
+                formControlName="observaciones"
+                [readonly]="liqBloqueada"
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Resumen fijo -->
+      <div class="col-lg-4">
+        <aside class="resumen-liq card" aria-label="Resumen de la liquidación">
+          <div class="franja-marca" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="h6 mb-0">Resumen</h3>
+              <span class="badge {{ estadoLiquidacion().clase }}">
+                <i class="bi {{ estadoLiquidacion().icono }} me-1" aria-hidden="true"></i>{{ estadoLiquidacion().texto }}
+              </span>
+            </div>
+
+            <dl class="row small mb-2 datos-liq">
+              <dt class="col-6 fw-normal text-muted">Tiempo trabajado</dt>
+              <dd class="col-6 text-end mb-1">{{ tiempoTrabajado().meses }} meses y {{ tiempoTrabajado().dias }} días</dd>
+              <dt class="col-6 fw-normal text-muted">Causa</dt>
+              <dd class="col-6 text-end mb-1">{{ e.causa }}</dd>
+            </dl>
+
+            <table class="table table-sm small mb-3 valores-unitarios">
+              <caption class="visually-hidden">Valores por mes y por día</caption>
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col" class="text-end">Por mes</th>
+                  <th scope="col" class="text-end">Por día</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (v of valoresUnitarios(); track v.concepto) {
+                  <tr>
+                    <th scope="row" class="fw-normal">{{ v.concepto }}</th>
+                    <td class="text-end">{{ v.mes | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                    <td class="text-end">{{ v.dia | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (e.liquidacion; as liq) {
+              <div class="d-flex justify-content-between small">
+                <span>Total haberes</span>
+                <span class="tabular">{{ liq.totalHaberes | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</span>
+              </div>
+              <div class="d-flex justify-content-between small mb-2">
+                <span>Total deducciones</span>
+                <span class="tabular deduccion">− {{ liq.totalDeducciones | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</span>
+              </div>
+              <div class="neto-caja mb-3">
+                <div class="small">Neto a recibir</div>
+                <div class="neto-valor tabular">{{ liq.neto | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</div>
+              </div>
+            }
+
+            @if (!soloLectura && !e.liquidacion?.confirmada) {
+              <div class="d-grid gap-2">
+                <button type="button" class="btn btn-outline-primary" [disabled]="calculando()" (click)="calcular()">
+                  <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>{{ e.liquidacion ? 'Recalcular' : 'Calcular' }}
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  [disabled]="!e.liquidacion || !!e.liquidacion.desactualizada || calculando()"
+                  [title]="e.liquidacion?.desactualizada ? 'Recalcule antes de confirmar' : ''"
+                  (click)="confirmarLiq()"
+                >
+                  <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Confirmar liquidación
+                </button>
+              </div>
+            } @else if (e.liquidacion?.confirmada) {
+              <div class="small text-muted">
+                <i class="bi bi-lock me-1" aria-hidden="true"></i>
+                Confirmada el {{ e.liquidacion?.fechaConfirmacion | date: 'dd/MM/yyyy HH:mm' }}.
+              </div>
+            }
+          </div>
+        </aside>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'docs') {
+    <section class="mb-4" aria-labelledby="docs-sistema">
+      <h3 id="docs-sistema" class="h6 text-uppercase text-muted fw-semibold mb-2 seccion-titulo">
+        Generados por el sistema
+      </h3>
+      <div class="row g-3">
+        @for (p of pdfsSistema(); track p.tipo) {
+          <div class="col-md-4">
+            <div class="card h-100 doc-sistema" [class.doc-bloqueado]="!p.disponible">
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                  <span class="doc-icono"><i class="bi {{ p.icono }}" aria-hidden="true"></i></span>
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ p.titulo }}</div>
+                    <span class="badge {{ p.estadoClase }}">
+                      <i class="bi {{ p.estadoIcono }} me-1" aria-hidden="true"></i>{{ p.estado }}
+                    </span>
+                  </div>
+                </div>
+                <p class="small text-muted flex-grow-1 mb-3">{{ p.ayuda }}</p>
+                <div class="d-flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    [disabled]="!p.disponible"
+                    [attr.aria-label]="'Ver ' + p.titulo"
+                    (click)="verPdf(p.tipo)"
+                  >
+                    <i class="bi bi-eye me-1" aria-hidden="true"></i>Ver
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    [disabled]="!p.disponible"
+                    [attr.aria-label]="'Descargar ' + p.titulo"
+                    (click)="descargarPdf(p.tipo)"
+                  >
+                    <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section aria-labelledby="docs-evidencias">
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-2">
+        <h3 id="docs-evidencias" class="h6 text-uppercase text-muted fw-semibold mb-0 seccion-titulo">
+          Evidencias subidas
+          <span class="badge rounded-pill text-bg-light border ms-1">{{ evidencias().length }}</span>
+        </h3>
+        @if (!soloLectura) {
+          <button type="button" class="btn btn-sm btn-primary" (click)="openUpload(null)">
+            <i class="bi bi-upload me-1" aria-hidden="true"></i>Subir documento
+          </button>
+        }
+      </div>
+
+      @if (faltantes().length) {
+        <div class="card border-warning-subtle mb-3 faltantes">
+          <div class="card-body py-2">
+            <div class="small fw-semibold mb-2">
+              <i class="bi bi-exclamation-circle me-1" aria-hidden="true"></i>
+              Documentos sugeridos que faltan (no bloquean el proceso)
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              @for (f of faltantes(); track f) {
+                <span class="faltante d-inline-flex align-items-center gap-2">
+                  {{ f }}
+                  @if (!soloLectura) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-link p-0"
+                      [attr.aria-label]="'Subir ' + f"
+                      (click)="openUpload(null, null, f)"
+                    >
+                      Subir
+                    </button>
+                  }
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (!soloLectura) {
+        <div
+          class="zona-drop mb-3"
+          [class.activa]="dropGeneral()"
+          (dragover)="$event.preventDefault(); dropGeneral.set(true)"
+          (dragleave)="dropGeneral.set(false)"
+          (drop)="onDropGeneral($event)"
+        >
+          <i class="bi bi-cloud-arrow-up fs-4 d-block mb-1" aria-hidden="true"></i>
+          Arrastre aquí un archivo (PDF, JPG o PNG · máx. 10 MB) o
+          <button type="button" class="btn btn-link p-0 align-baseline" (click)="openUpload(null)">
+            selecciónelo
+          </button>
+        </div>
+      }
+
+      @for (g of evidenciasPorTipo(); track g.tipo) {
+        <div class="card mb-3">
+          <div class="card-header fw-semibold d-flex justify-content-between">
+            {{ g.tipo }}
+            <span class="text-muted small fw-normal">{{ g.documentos.length }} archivo(s)</span>
+          </div>
+          <ul class="list-group list-group-flush">
+            @for (d of g.documentos; track d.id) {
+              <li class="list-group-item d-flex flex-wrap align-items-center gap-3">
+                <i class="bi {{ iconoMime(d.mime) }} fs-4 text-primary" aria-hidden="true"></i>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="text-truncate fw-medium">{{ d.nombreOriginal }}</div>
+                  <div class="small text-muted">
+                    {{ d.fechaSubida | date: 'dd/MM/yyyy' }} · {{ formatTamano(d.tamano) }}
+                    @if (d.requisito) {
+                      · <i class="bi bi-link-45deg" aria-hidden="true"></i>{{ d.requisito.pregunta }}
+                    }
+                  </div>
+                  @if (d.descripcion && d.descripcion !== d.requisito?.pregunta) {
+                    <div class="small text-muted">{{ d.descripcion }}</div>
+                  }
+                </div>
+                <div class="text-nowrap">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary me-1"
+                    [attr.aria-label]="'Ver ' + d.nombreOriginal"
+                    title="Ver"
+                    (click)="verDocumento(d)"
+                  >
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    [attr.aria-label]="'Descargar ' + d.nombreOriginal"
+                    title="Descargar"
+                    (click)="descargarDocumento(d)"
+                  >
+                    <i class="bi bi-download" aria-hidden="true"></i>
+                  </button>
+                  @if (!soloLectura) {
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      [attr.aria-label]="'Eliminar ' + d.nombreOriginal"
+                      title="Eliminar"
+                      (click)="eliminarDocumento(d)"
+                    >
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      } @empty {
+        <div class="card">
+          <div class="card-body text-center text-muted py-4">
+            <i class="bi bi-folder2 fs-2 d-block mb-2" aria-hidden="true"></i>
+            Todavía no hay evidencias. Puede subirlas aquí o desde cada ítem del paz y salvo.
+          </div>
+        </div>
+      }
+    </section>
+  }
+}
+
+@if (showReqModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="obs-titulo"
+    style="background: rgba(0, 0, 0, 0.45)"
+    (keydown.escape)="closeReq()"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form [formGroup]="reqForm" (ngSubmit)="saveReq()">
+          <div class="modal-header">
+            <h5 class="modal-title" id="obs-titulo">
+              @if (reqRespuesta(); as resp) {
+                Responder {{ resp === 'SI' ? 'SÍ' : resp }}
+              } @else {
+                Observación
+              }
+            </h5>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="closeReq()"></button>
+          </div>
+          <div class="modal-body">
+            @if (reqTarget(); as rt) {
+              <p class="mb-2">{{ rt.pregunta }}</p>
+              @if (reqRespuesta(); as resp) {
+                <p class="small mb-3">
+                  Esperada: <strong>{{ rt.respuestaEsperada === 'SI' ? 'SÍ' : 'NO' }}</strong> ·
+                  @if (resp === 'N/A' || resp === rt.respuestaEsperada) {
+                    <span class="badge text-bg-success"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Cumple</span>
+                  } @else {
+                    <span class="badge text-bg-danger"><i class="bi bi-x-lg me-1" aria-hidden="true"></i>No cumple</span>
+                  }
+                </p>
+                @if (rt.origen === 'Bien' && resp === 'SI') {
+                  <div class="alert alert-info py-2 small">
+                    El bien pasará a estado <strong>Devuelto</strong> con la fecha de hoy.
+                  </div>
+                }
+                @if (rt.origen === 'Obligacion' && resp === 'NO') {
+                  <div class="alert alert-info py-2 small">
+                    La deuda pasará a <strong>Por descontar</strong> y se descontará en la liquidación.
+                  </div>
+                }
+              }
+            }
+            <div class="mb-0">
+              <label class="form-label" for="obs-texto">
+                Observación
+                @if (requiereObservacion(reqTarget(), reqRespuesta())) {
+                  <span class="text-danger" aria-hidden="true">*</span>
+                  <span class="visually-hidden">(obligatoria)</span>
+                }
+              </label>
+              <textarea
+                id="obs-texto"
+                class="form-control"
+                rows="3"
+                formControlName="observacion"
+                [attr.aria-invalid]="obsError() ? true : null"
+                [attr.aria-describedby]="obsError() ? 'obs-error' : null"
+              ></textarea>
+              @if (obsError(); as err) {
+                <div id="obs-error" class="small text-danger mt-1" role="alert">{{ err }}</div>
+              }
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeReq()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (confirmacion(); as c) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="confirm-titulo"
+    aria-describedby="confirm-mensaje"
+    style="background: rgba(0, 0, 0, 0.45)"
+    (keydown.escape)="confirmacion.set(null)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirm-titulo">{{ c.titulo }}</h5>
+          <button type="button" class="btn-close" aria-label="Cerrar" (click)="confirmacion.set(null)"></button>
+        </div>
+        <div class="modal-body" id="confirm-mensaje">{{ c.mensaje }}</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" id="confirm-cancelar" (click)="confirmacion.set(null)">
+            Cancelar
+          </button>
+          <button type="button" class="btn {{ c.peligro ? 'btn-danger' : 'btn-primary' }}" (click)="aceptarConfirmacion()">
+            {{ c.boton }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showPdf()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.55)">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95vw">
+      <div class="modal-content" style="height: 90vh">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ pdfTitle() }}</h5>
+          <button type="button" class="btn-close" (click)="closePdf()"></button>
+        </div>
+        <div class="modal-body p-0">
+          @if (pdfUrl(); as url) {
+            <iframe [src]="url" class="w-100 h-100 border-0" style="min-height: 75vh"></iframe>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUploadModal()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.45)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form [formGroup]="uploadForm" (ngSubmit)="submitUpload()">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ uploadRequisitoId() ? 'Adjuntar evidencia' : 'Subir documento' }}
+            </h5>
+            <button type="button" class="btn-close" (click)="closeUpload()"></button>
+          </div>
+          <div class="modal-body">
+            @if (uploadRequisitoId(); as rid) {
+              @if (docsDeRequisito(rid).length) {
+                <div class="mb-3">
+                  <div class="small fw-semibold mb-1">Evidencias adjuntas</div>
+                  <ul class="list-group list-group-flush border rounded">
+                    @for (d of docsDeRequisito(rid); track d.id) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center gap-2 py-1">
+                        <span class="small text-truncate">
+                          <i class="bi bi-file-earmark me-1" aria-hidden="true"></i>{{ d.nombreOriginal }}
+                          <span class="text-muted">· {{ d.tipo }}</span>
+                        </span>
+                        <span class="text-nowrap">
+                          <button type="button" class="btn btn-sm btn-link" [attr.aria-label]="'Ver ' + d.nombreOriginal" (click)="verDocumento(d)">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                          </button>
+                          @if (!soloLectura) {
+                            <button type="button" class="btn btn-sm btn-link text-danger" [attr.aria-label]="'Eliminar ' + d.nombreOriginal" (click)="eliminarDocumento(d)">
+                              <i class="bi bi-trash" aria-hidden="true"></i>
+                            </button>
+                          }
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            }
+            @if (!soloLectura) {
+            <div class="mb-3">
+              <label class="form-label" for="up-tipo">Tipo</label>
+              <select id="up-tipo" class="form-select" formControlName="tipo">
+                @for (t of tiposDocumento; track t) {
+                  <option [ngValue]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="up-desc">Descripción</label>
+              <textarea id="up-desc" class="form-control" rows="2" formControlName="descripcion"></textarea>
+            </div>
+            <div class="mb-0">
+              <label class="form-label" for="up-file">Archivo (PDF, JPG o PNG · máx. 10 MB)</label>
+              <input
+                id="up-file"
+                type="file"
+                class="form-control"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                (change)="onFileSelected($event)"
+              />
+              @if (selectedFile(); as f) {
+                <div class="small text-muted mt-1">{{ f.name }} ({{ formatTamano(f.size) }})</div>
+              }
+            </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeUpload()">
+              Cancelar
+            </button>
+            @if (!soloLectura) {
+              <button type="submit" class="btn btn-primary" [disabled]="uploading()">
+                {{ uploading() ? 'Subiendo…' : 'Subir' }}
+              </button>
+            }
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDocViewer()) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.55)">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95vw">
+      <div class="modal-content" style="height: 90vh">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ docViewerTitle() }}</h5>
+          <button type="button" class="btn-close" (click)="closeDocViewer()"></button>
+        </div>
+        <div class="modal-body p-0 d-flex align-items-center justify-content-center bg-dark-subtle">
+          @if (docViewerUrl(); as url) {
+            @if (isPdfMime(docViewerMime())) {
+              <iframe [src]="url" class="w-100 h-100 border-0" style="min-height: 75vh"></iframe>
+            } @else if (isImageMime(docViewerMime())) {
+              <img [src]="url" class="img-fluid p-3" [alt]="docViewerTitle()" />
+            } @else {
+              <div class="text-muted p-4">No se puede previsualizar este tipo de archivo.</div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

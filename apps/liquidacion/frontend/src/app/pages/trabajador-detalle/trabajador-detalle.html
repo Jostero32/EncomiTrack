@@ -1,0 +1,536 @@
+@if (trabajador(); as t) {
+  <div class="mb-3 d-flex flex-wrap gap-2 justify-content-between align-items-start">
+  <div>
+    <a routerLink="/trabajadores" class="small text-decoration-none"
+      ><i class="bi bi-arrow-left" aria-hidden="true"></i> Trabajadores</a
+    >
+    <h2 class="h4 mb-1">{{ t.nombres }} {{ t.apellidos }}</h2>
+    <div class="text-muted">
+      CI {{ t.cedula }} · {{ t.cargo }} · {{ t.tipoVinculo }}
+      <span
+        class="badge ms-2"
+        [class.text-bg-success]="t.estado === 'Activo'"
+        [class.text-bg-secondary]="t.estado === 'Finalizado'"
+        >{{ t.estado }}</span
+      >
+    </div>
+  </div>
+    @if (expedienteAbierto(); as e) {
+      <a class="btn btn-outline-primary" [routerLink]="['/expedientes', e.id]" [queryParams]="{ tab: 'paz' }">
+        <i class="bi bi-folder2-open me-1" aria-hidden="true"></i>Continuar salida ({{ e.numero }})
+      </a>
+    } @else if (t.estado === 'Activo') {
+      <a class="btn btn-primary" routerLink="/expedientes" [queryParams]="{ nuevo: t.id }">
+        <i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Iniciar salida
+      </a>
+    }
+  </div>
+
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <button type="button" class="nav-link" [class.active]="tab() === 'datos'" (click)="setTab('datos')">
+        Datos
+      </button>
+    </li>
+    <li class="nav-item">
+      <button type="button" class="nav-link" [class.active]="tab() === 'bienes'" (click)="setTab('bienes')">
+        Bienes y accesos
+        @if (bienesAsignados()) {
+          <span class="badge text-bg-warning ms-1">{{ bienesAsignados() }}</span>
+        }
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'obligaciones'"
+        (click)="setTab('obligaciones')"
+      >
+        Obligaciones
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'vacaciones'"
+        (click)="setTab('vacaciones')"
+      >
+        Vacaciones
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        type="button"
+        class="nav-link"
+        [class.active]="tab() === 'expedientes'"
+        (click)="setTab('expedientes')"
+      >
+        Expedientes
+      </button>
+    </li>
+  </ul>
+
+  @if (tab() === 'datos') {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Cédula</dt>
+          <dd class="col-sm-9">{{ t.cedula }}</dd>
+          <dt class="col-sm-3">Cargo</dt>
+          <dd class="col-sm-9">{{ t.cargo }}</dd>
+          <dt class="col-sm-3">Departamento</dt>
+          <dd class="col-sm-9">{{ t.departamento }}</dd>
+          <dt class="col-sm-3">Tipo de vínculo</dt>
+          <dd class="col-sm-9">{{ t.tipoVinculo }}</dd>
+          <dt class="col-sm-3">Unidad</dt>
+          <dd class="col-sm-9">{{ t.unidad || '—' }}</dd>
+          <dt class="col-sm-3">Jefe inmediato</dt>
+          <dd class="col-sm-9">{{ t.jefeInmediato || '—' }}</dd>
+          <dt class="col-sm-3">Fecha de ingreso</dt>
+          <dd class="col-sm-9">{{ t.fechaIngreso | date: 'dd/MM/yyyy' }}</dd>
+          <dt class="col-sm-3">Remuneración</dt>
+          <dd class="col-sm-9">{{ t.remuneracion | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</dd>
+        </dl>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'bienes') {
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Bienes y accesos asignados</span>
+        <button type="button" class="btn btn-sm btn-primary" (click)="openBien()">
+          <i class="bi bi-plus-lg me-1"></i>Agregar
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th>Código / serie</th>
+              <th>Responsable</th>
+              <th>Asignación</th>
+              <th>Estado</th>
+              <th>Devolución</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of bienes(); track b.id) {
+              <tr>
+                <td>{{ b.tipo }}</td>
+                <td>
+                  {{ b.descripcion }}
+                  @if (b.observacion) {
+                    <div class="small text-muted">{{ b.observacion }}</div>
+                  }
+                </td>
+                <td>{{ b.codigoSerie || '—' }}</td>
+                <td>{{ b.departamentoResponsable }}</td>
+                <td>{{ b.fechaAsignacion ? (b.fechaAsignacion | date: 'dd/MM/yyyy') : '—' }}</td>
+                <td><span class="badge {{ bienBadge(b.estado) }}">{{ b.estado }}</span></td>
+                <td>{{ b.fechaDevolucion ? (b.fechaDevolucion | date: 'dd/MM/yyyy') : '—' }}</td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-sm btn-outline-primary me-1" (click)="openBien(b)">Editar</button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteBien(b)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">Sin bienes ni accesos asignados</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'obligaciones') {
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+          Obligaciones
+          <span class="text-muted fw-normal small ms-2">
+            Pendiente: {{ totalPendiente() | currency: 'USD':'symbol':'1.2-2':'es-EC' }}
+          </span>
+        </span>
+        <button type="button" class="btn btn-sm btn-primary" (click)="openObligacion()">
+          <i class="bi bi-plus-lg me-1"></i>Agregar
+        </button>
+      </div>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Concepto</th>
+              <th>Fecha</th>
+              <th class="text-end">Valor</th>
+              <th>Estado</th>
+              <th>Justificación</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (o of obligaciones(); track o.id) {
+              <tr>
+                <td>{{ o.tipo }}</td>
+                <td>{{ o.concepto }}</td>
+                <td>{{ o.fecha | date: 'dd/MM/yyyy' }}</td>
+                <td class="text-end">{{ o.valor | currency: 'USD':'symbol':'1.2-2':'es-EC' }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.text-bg-warning]="o.estado === 'Pendiente'"
+                    [class.text-bg-info]="o.estado === 'Por descontar'"
+                    [class.text-bg-success]="o.estado === 'Pagada'"
+                    >{{ o.estado }}</span
+                  >
+                </td>
+                <td class="small text-muted">{{ o.justificacion || '—' }}</td>
+                <td class="text-end text-nowrap">
+                  <button class="btn btn-sm btn-outline-primary me-1" (click)="openObligacion(o)">
+                    Editar
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteObligacion(o)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">Sin obligaciones registradas</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (tab() === 'vacaciones') {
+    @if (vacaciones(); as v) {
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <span class="fw-semibold">Períodos de vacaciones</span>
+          <div class="d-flex align-items-center gap-2">
+            <label class="small text-muted mb-0" for="fechaCorte">Fecha de corte</label>
+            <input
+              id="fechaCorte"
+              type="date"
+              class="form-control form-control-sm"
+              style="width: 11rem"
+              [value]="fechaCorte()"
+              (change)="cambiarFechaCorte($any($event.target).value)"
+            />
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th class="text-end">Días generados</th>
+                <th class="text-end">Días gozados</th>
+                <th class="text-end">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of v.periodos; track p.numero) {
+                <tr [class.text-muted]="!p.completo">
+                  <td>
+                    {{ p.numero }}
+                    @if (!p.completo) {
+                      <span class="badge text-bg-light border ms-1">En curso</span>
+                    }
+                  </td>
+                  <td>{{ p.desde | date: 'dd/MM/yyyy' }}</td>
+                  <td>{{ p.hasta | date: 'dd/MM/yyyy' }}</td>
+                  <td class="text-end">{{ p.diasGenerados | number: '1.0-2' }}</td>
+                  <td class="text-end">{{ p.diasGozados | number: '1.0-2' }}</td>
+                  <td class="text-end fw-semibold">{{ p.saldo | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td colspan="4"></td>
+                <td class="text-end">Saldo períodos completos</td>
+                <td class="text-end fw-bold">{{ v.saldoPeriodosCompletos | number: '1.0-2' }} días</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="card-footer bg-white small text-muted">
+          15 días por período completo + 1 día adicional desde el 6.º año (máx. 15). Los días
+          gozados se descuentan del período más antiguo con saldo. El período en curso es
+          referencial; en la liquidación se paga como remuneraciones/24.
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Vacaciones gozadas ({{ v.diasGozadosTotal }} días)</span>
+          <button type="button" class="btn btn-sm btn-primary" (click)="openVacacion()">
+            <i class="bi bi-plus-lg me-1"></i>Registrar
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table mb-0 align-middle">
+            <thead>
+              <tr>
+                <th>Fecha de inicio</th>
+                <th class="text-end">Días</th>
+                <th>Documento</th>
+                <th>Observación</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (g of v.gozadas; track g.id) {
+                <tr>
+                  <td>{{ g.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+                  <td class="text-end">{{ g.dias }}</td>
+                  <td>{{ g.documento || '—' }}</td>
+                  <td class="small text-muted">{{ g.observacion || '—' }}</td>
+                  <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary me-1" (click)="openVacacion(g)">
+                      Editar
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteVacacion(g)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-4">Sin vacaciones gozadas</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    } @else {
+      <div class="text-muted">Cargando vacaciones…</div>
+    }
+  }
+
+  @if (tab() === 'expedientes') {
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Salida</th>
+              <th>Causa</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of expedientes(); track e.id) {
+              <tr>
+                <td>{{ e.numero }}</td>
+                <td>{{ e.fechaSalida | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ e.causa }}</td>
+                <td>{{ e.estado }}</td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" [routerLink]="['/expedientes', e.id]">Abrir</a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">Sin expedientes</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+} @else {
+  <div class="text-muted">Cargando trabajador…</div>
+}
+
+@if (modal() === 'bien') {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.45)">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form [formGroup]="bienForm" (ngSubmit)="saveBien()">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ editingId() ? 'Editar' : 'Nuevo' }} bien o acceso</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" formControlName="tipo">
+                  @for (x of tiposBien; track x) {
+                    <option [value]="x">{{ x }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Descripción</label>
+                <input class="form-control" formControlName="descripcion" />
+                @if (bienForm.controls.descripcion.touched && bienForm.controls.descripcion.invalid) {
+                  <div class="text-danger small">Obligatoria</div>
+                }
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Código / serie</label>
+                <input class="form-control" formControlName="codigoSerie" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Departamento responsable</label>
+                <select class="form-select" formControlName="departamentoResponsable">
+                  @for (x of departamentos; track x) {
+                    <option [value]="x">{{ x }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Fecha de asignación</label>
+                <input type="date" class="form-control" formControlName="fechaAsignacion" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select class="form-select" formControlName="estado">
+                  @for (x of estadosBien; track x) {
+                    <option [value]="x">{{ x }}</option>
+                  }
+                </select>
+              </div>
+              @if (bienForm.controls.estado.value === 'Devuelto') {
+                <div class="col-md-4">
+                  <label class="form-label">Fecha de devolución</label>
+                  <input type="date" class="form-control" formControlName="fechaDevolucion" />
+                </div>
+              }
+              <div class="col-12">
+                <label class="form-label">Observación</label>
+                <textarea class="form-control" rows="2" formControlName="observacion"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modal() === 'obligacion') {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.45)">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form [formGroup]="obligacionForm" (ngSubmit)="saveObligacion()">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ editingId() ? 'Editar' : 'Nueva' }} obligación</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" formControlName="tipo">
+                  @for (x of tiposObligacion; track x) {
+                    <option [value]="x">{{ x }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-md-8">
+                <label class="form-label">Concepto</label>
+                <input class="form-control" formControlName="concepto" />
+                @if (obligacionForm.controls.concepto.touched && obligacionForm.controls.concepto.invalid) {
+                  <div class="text-danger small">Obligatorio</div>
+                }
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Valor</label>
+                <input type="number" step="0.01" min="0.01" class="form-control" formControlName="valor" />
+                @if (obligacionForm.controls.valor.touched && obligacionForm.controls.valor.invalid) {
+                  <div class="text-danger small">Debe ser mayor a 0</div>
+                }
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" formControlName="fecha" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select class="form-select" formControlName="estado">
+                  @for (x of estadosObligacion; track x) {
+                    <option [value]="x">{{ x }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Justificación</label>
+                <textarea class="form-control" rows="2" formControlName="justificacion"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modal() === 'vacacion') {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.45)">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form [formGroup]="vacacionForm" (ngSubmit)="saveVacacion()">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ editingId() ? 'Editar' : 'Registrar' }} vacaciones gozadas</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Fecha de inicio</label>
+                <input type="date" class="form-control" formControlName="fechaInicio" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Días</label>
+                <input type="number" min="1" step="1" class="form-control" formControlName="dias" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Documento</label>
+                <input class="form-control" formControlName="documento" placeholder="Ej. VAC-2026-001" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Observación</label>
+                <textarea class="form-control" rows="2" formControlName="observacion"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
