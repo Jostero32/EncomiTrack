@@ -22,6 +22,8 @@ const page = await context.newPage();
 
 for (const shot of cfg.shots) {
   try {
+    if (shot.viewport) await page.setViewportSize(shot.viewport); // tamaño propio de esta captura
+    else await page.setViewportSize(cfg.viewport ?? { width: 1440, height: 900 });
     await page.goto(shot.url, { waitUntil: 'networkidle', timeout: 30000 });
     // "?Texto" = clic opcional: se omite si el botón no existe (p. ej. ya se calculó antes).
     for (const raw of shot.click ?? []) {
