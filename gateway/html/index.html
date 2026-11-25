@@ -63,6 +63,7 @@
       transition: transform .15s ease, box-shadow .15s ease;
     }
     a.modulo:nth-child(2) { border-top-color: var(--amarillo); }
+    a.modulo:nth-child(3) { border-top-color: var(--rojo); }
     a.modulo:hover, a.modulo:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(17, 64, 111, .15); outline: none; }
     .modulo h2 { margin: 0 0 6px; font-size: 1.15rem; }
     .modulo .ruta { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; color: var(--gris); }
@@ -78,7 +79,7 @@
       <img src="brand/encomitrack.svg" alt="" />
       <div>
         <h1>EncomiTrack</h1>
-        <p>Gestión de talento humano para empresas ecuatorianas</p>
+        <p>Emprendimiento y Legislación Laboral · proyecto integrador</p>
       </div>
     </div>
   </header>
@@ -86,10 +87,21 @@
   <main>
     <div class="contenedor">
       <p class="intro">
-        Suite con dos módulos que comparten marca y despliegue. Los datos cargados
-        son ficticios y sirven para demostración.
+        EncomiTrack es un emprendimiento de gestión de encomiendas. Esta suite reúne el
+        portal del proyecto y los dos sistemas de talento humano construidos para la empresa.
+        Los datos cargados son ficticios y sirven para demostración.
       </p>
       <div class="modulos">
+        <a class="modulo" href="emprendimiento-dashboard/">
+          <h2>Portal del proyecto</h2>
+          <span class="ruta">/emprendimiento-dashboard</span>
+          <ul>
+            <li>Plan de negocios, Canvas y estudio económico</li>
+            <li>Obligaciones tributarias ante el SRI</li>
+            <li>Entregables del semestre con vista previa</li>
+          </ul>
+          <span class="ir">Abrir portal →</span>
+        </a>
         <a class="modulo" href="nominas/">
           <h2>Roles de pago</h2>
           <span class="ruta">/nominas</span>

@@ -1,0 +1,36 @@
+{
+  "name": "ell-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal académico de Emprendimiento y Legislación Laboral (FISEI · UTA), parte de la suite EncomiTrack",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "logos": "python3 scripts/remaster_logos.py ../Logos public/brand"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.1.0",
+    "@fontsource-variable/source-serif-4": "^5.1.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
+    "mammoth": "^1.8.0",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-pdf": "^9.2.1",
+    "server-only": "^0.0.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.7.0"
+  }
+}

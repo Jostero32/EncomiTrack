@@ -1,16 +1,17 @@
 {
   "version": 1,
   "titulo": "EncomiTrack",
-  "resumen": "Suite de talento humano para empresas ecuatorianas: roles de pago con parámetros legales por vigencia y paz y salvo con liquidación laboral, desplegada con un solo docker compose.",
+  "resumen": "Proyecto integrador de un emprendimiento de encomiendas: portal del semestre, roles de pago con parámetros legales por vigencia y paz y salvo con liquidación laboral, desplegados juntos con un solo docker compose.",
   "categorias": ["fullstack", "emprendimiento"],
   "stack": ["Next.js", "Angular", "Express", "TypeORM", "SQLite", "Docker", "nginx"],
-  "estado": "MVP funcional",
+  "estado": "Desplegado",
   "destacado": true,
   "anio": 2026,
   "rol": "Diseño y desarrollo completo",
-  "portada": "docs/img/02-nomina-panel.png",
+  "portada": "docs/img/01-inicio.png",
   "capturas": [
     "docs/img/01-inicio.png",
+    "docs/img/10-portal-inicio.png",
     "docs/img/02-nomina-panel.png",
     "docs/img/04-nomina-rol.png",
     "docs/img/03-nomina-organigrama.png",
@@ -18,10 +19,11 @@
     "docs/img/09-liquidacion-calculo.png"
   ],
   "aspectos": [
+    "Tres aplicaciones (Next.js, Next.js y Angular + Express) detrás de un gateway nginx por subruta",
+    "Un solo despliegue Compose en Dokploy, sin servicios externos (Supabase reemplazado por volúmenes)",
     "Cálculo monetario sin punto flotante (bigint en centavos y decimal.js)",
     "Parámetros legales versionados por vigencia: los roles anteriores no cambian",
-    "Tres regímenes laborales (CT, LOSEP, LOEP) sin condicionales en el motor",
-    "Gateway nginx: una sola entrada para varias apps servidas por subruta"
+    "Tres regímenes laborales (CT, LOSEP, LOEP) sin condicionales en el motor"
   ],
   "demo": null
 }

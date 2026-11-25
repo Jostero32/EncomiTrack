@@ -7,3 +7,4 @@ dist/
 .angular/
 *.tsbuildinfo
 .DS_Store
+documentos/

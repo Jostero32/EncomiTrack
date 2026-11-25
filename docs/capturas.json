@@ -10,6 +10,9 @@
     { "name": "06-liquidacion-panel", "url": "http://localhost:8080/liquidacion/dashboard" },
     { "name": "07-liquidacion-expediente", "url": "http://localhost:8080/liquidacion/expedientes/1" },
     { "name": "08-liquidacion-paz-y-salvo", "url": "http://localhost:8080/liquidacion/expedientes/1", "click": ["Paz y salvo"] },
-    { "name": "09-liquidacion-calculo", "url": "http://localhost:8080/liquidacion/expedientes/1", "click": ["Liquidación", "Calcular ahora"] }
+    { "name": "09-liquidacion-calculo", "url": "http://localhost:8080/liquidacion/expedientes/1", "click": ["Liquidación", "?Calcular ahora"] },
+    { "name": "10-portal-inicio", "url": "http://localhost:8080/emprendimiento-dashboard" },
+    { "name": "11-portal-emprendimiento", "url": "http://localhost:8080/emprendimiento-dashboard/modulos/emprendimiento" },
+    { "name": "12-portal-liquidacion-en-vivo", "url": "http://localhost:8080/emprendimiento-dashboard/modulos/liquidacion", "delay": 1500 }
   ]
 }

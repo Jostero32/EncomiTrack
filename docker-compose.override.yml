@@ -1,0 +1,6 @@
+# Solo para uso local: `docker compose up` carga este archivo automáticamente.
+# Dokploy usa únicamente docker-compose.yml, así que en el servidor no se publica ningún puerto.
+services:
+  gateway:
+    ports:
+      - "127.0.0.1:${PORT:-8080}:80"

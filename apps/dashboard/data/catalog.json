@@ -1,0 +1,419 @@
+{
+  "course": {
+    "name": "Emprendimiento y Legislación Laboral",
+    "level": "Octavo semestre · Paralelo A",
+    "faculty": "Facultad de Ingeniería en Sistemas, Electrónica e Industrial",
+    "career": "Carrera de Software",
+    "cycle": "Julio – Diciembre 2026",
+    "teacher": "Econ. María Francisca Cazorla, Ph. D.",
+    "team": [
+      "Andrade Ocaña Edison Alejandro",
+      "Carrasco Paredes Kevin Andrés",
+      "Guatumillo Trujillo Karen Michelle"
+    ],
+    "venture": "EncomiTrack — Sistema de gestión de encomiendas"
+  },
+  "modules": [
+    {
+      "slug": "emprendimiento",
+      "number": 1,
+      "title": "Emprendimiento",
+      "tagline": "De un problema real a un plan de negocios viable",
+      "description": "Idea y oportunidad de negocio, modelo Canvas, perfil estratégico, mercado, estudio económico y registro de marca de EncomiTrack.",
+      "icon": "Lightbulb"
+    },
+    {
+      "slug": "tributario",
+      "number": 2,
+      "title": "Obligaciones Tributarias",
+      "tagline": "Formalización y cumplimiento ante el SRI",
+      "description": "RUC simulado, facturación electrónica, documentos comerciales, declaración del IVA e importación de tecnología.",
+      "icon": "Landmark"
+    },
+    {
+      "slug": "remuneraciones",
+      "number": 3,
+      "title": "Remuneraciones y Nómina",
+      "tagline": "Contratación, beneficios sociales y roles de pago",
+      "description": "Contratación de personal, análisis comparativo de contratos, organigrama de EncomiTrack y sistema automatizado de roles de pago.",
+      "icon": "Wallet"
+    },
+    {
+      "slug": "liquidacion",
+      "number": 4,
+      "title": "Liquidación Laboral",
+      "tagline": "Terminación de la relación laboral, paz y salvo y liquidaciones",
+      "description": "Formas de terminación, cálculo de liquidaciones, caso judicial real y sistema de paz y salvo con generación documental.",
+      "icon": "FileCheck2"
+    }
+  ],
+  "documents": [
+    {
+      "slug": "guia-ape-1-plan-de-negocios",
+      "title": "Guía APE 1 — Plan de Negocios EncomiTrack",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Guía APE",
+      "modality": "Grupal",
+      "date": "Julio – Diciembre 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/GUÍA APE 1 - Elaboración del Plan de Negocios.pdf",
+      "featured": true,
+      "summary": "Plan de negocios consolidado de EncomiTrack. Con 9 clientes a $200 mensuales se proyectan ingresos de $1.800 al mes frente a costos de $1.560, un resultado de $240 mensuales (margen del 13,3 %). El proyecto se concluye viable bajo condiciones: el 84,6 % de los costos son fijos y el escenario pesimista de 6 clientes genera pérdida.",
+      "highlights": [
+        { "label": "Inversión inicial", "value": "$2.045,00" },
+        { "label": "Recuperación", "value": "8,5 meses" },
+        { "label": "Punto de equilibrio", "value": "8 cooperativas" },
+        { "label": "Margen mensual", "value": "13,3 %" }
+      ]
+    },
+    {
+      "slug": "tarea-01-problema-oportunidad",
+      "title": "Tarea 01 — De un problema a una oportunidad de negocio",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Grupal",
+      "date": "Agosto 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 01.pdf",
+      "summary": "Identificación de tres problemas reales y formulación de la oportunidad inicial. Entre ellos, la pérdida y falta de trazabilidad de encomiendas durante su transporte en cooperativas, problema que da origen a EncomiTrack.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-02-modelo-canvas",
+      "title": "Tarea 02 — Business Model Canvas",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Grupal",
+      "date": "18/08/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 02  Modelo Canvas.pdf",
+      "summary": "Modelo de negocio de EncomiTrack en los nueve bloques del Canvas. La propuesta de valor ataca la pérdida y el extravío de encomiendas por falta de seguimiento; los socios clave son las cooperativas de transporte, proveedores de geolocalización y de lectores de códigos.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-03-perfil-estrategico",
+      "title": "Tarea 03 — Perfil estratégico",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Grupal",
+      "date": "19/08/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 03 Taller Perfil Estratégico.pdf",
+      "summary": "Identidad y dirección estratégica: el nombre EncomiTrack une «Encomienda» y «Track». Se define como una PWA que rastrea encomiendas mediante un código único escaneado en cada etapa, con identidad visual, misión, visión, FODA y estrategias.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-04-mercado-operacion",
+      "title": "Tarea 04 — Mercado y operación del emprendimiento",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Grupal",
+      "date": "25/08/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 04_Mercado_Operacion_Emprendimiento (1).pdf",
+      "summary": "Definición del cliente objetivo (cooperativas de transporte interprovincial), análisis de competidores reales y oferta básica: una cadena de custodia digital que elimina pérdidas y ofrece prueba confiable ante reclamos.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-05-viabilidad-financiera",
+      "title": "Tarea 05 — Estudio económico y costos",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Plantilla automatizada",
+      "modality": "Grupal",
+      "date": "Agosto 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 05 Vialidad financiera-costos.pdf",
+      "summary": "Plantilla automatizada del estudio económico: inversión inicial (equipos, licencias, desarrollo, dominio, herramientas y publicidad), costos mensuales de operación y talento humano.",
+      "highlights": [
+        { "label": "Inversión inicial total", "value": "$2.045,00" },
+        { "label": "Costos operativos mensuales", "value": "$560,00" },
+        { "label": "Costos fijos", "value": "$320,00" },
+        { "label": "Costos variables", "value": "$240,00" }
+      ]
+    },
+    {
+      "slug": "tarea-10-registro-marca",
+      "title": "Tarea 10 — Registro de marca y gamificación",
+      "module": "emprendimiento",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Grupal",
+      "date": "Septiembre 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 10 Registro de marca y gamificación.pdf",
+      "summary": "Simulación del registro del signo distintivo EncomiTrack ante el SENADI: búsqueda fonética, clasificación de Niza (clase 42) y formulario de solicitud. Incluye evidencias del Casillero Virtual y de la actividad de gamificación.",
+      "highlights": [{ "label": "Clase de Niza", "value": "42" }]
+    },
+    {
+      "slug": "guia-ape-2-obligaciones-tributarias",
+      "title": "Guía APE 2 — Obligaciones tributarias de una PYME tecnológica",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Guía APE",
+      "modality": "Grupal",
+      "date": "Julio – Diciembre 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/GUÍA APE 2 - Obligaciones tributarias de una PYME del sector tecnológico.pdf",
+      "featured": true,
+      "summary": "Obligaciones de EncomiTrack en el Régimen General: RUC y código CIIU, comprobantes de venta, facturación electrónica, declaración del IVA (Formulario 104), operaciones con el exterior, importación de tecnología y registro de marca, consolidados en una matriz de periodicidad. Concluye que la formalización también exige la afiliación al IESS, la patente municipal y el permiso de Bomberos.",
+      "highlights": [
+        { "label": "Régimen", "value": "General" },
+        { "label": "Declaración IVA", "value": "Formulario 104" }
+      ]
+    },
+    {
+      "slug": "tarea-06-ruc-formalizacion",
+      "title": "Tarea 06 — Simulación del RUC y formalización",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Taller",
+      "modality": "Individual",
+      "date": "01/09/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 06 Simulación del RUC y formalización de un emprendimiento.pdf",
+      "summary": "RUC académico simulado de persona natural en el Régimen General, no obligada a llevar contabilidad, con jurisdicción en la Zona 3 (Tungurahua, Ambato). Incluye actividades CIIU, la consulta de cinco empresas y la obligación identificada: declaración semestral de IVA.",
+      "highlights": [
+        { "label": "Régimen", "value": "General" },
+        { "label": "Obligación", "value": "IVA semestral" }
+      ]
+    },
+    {
+      "slug": "tarea-07-factura-simulador",
+      "title": "Tarea 07 — Factura en el simulador del SRI",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Práctica",
+      "modality": "Grupal",
+      "date": "02/09/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 07 Factura simulador.pdf",
+      "summary": "Emisión de una factura en el portal facturador del SRI por el servicio EncomiTrack, gravado con IVA del 15 %.",
+      "highlights": [
+        { "label": "Subtotal", "value": "$250,00" },
+        { "label": "IVA 15 %", "value": "$37,50" },
+        { "label": "Valor a pagar", "value": "$287,50" }
+      ]
+    },
+    {
+      "slug": "tarea-08-documentos-comerciales-iva",
+      "title": "Tarea 08 — Documentos comerciales y declaración del IVA",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Práctica",
+      "modality": "Individual",
+      "date": "08/09/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 08 Obligaciones tributarias-IVA_Alejandro Andrade.pdf",
+      "summary": "Caso integrador INDUMETAL S.A.: llenado de los documentos de las operaciones de compra, venta, traslado y ajuste de septiembre de 2026, como insumo para consolidar el IVA del período.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-09-iva-parte-dos",
+      "title": "Tarea 09 — Obligaciones tributarias: IVA (parte dos)",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Práctica",
+      "modality": "Individual",
+      "date": "08/09/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 09 Obligaciones tributarias-IVA parte dos.pdf",
+      "summary": "Continuación del caso INDUMETAL S.A.: matriz de liquidación del IVA (crédito tributario, retenciones e IVA a pagar) y control conceptual de los documentos que afectan el cálculo.",
+      "highlights": []
+    },
+    {
+      "slug": "tarea-11-importacion-tecnologia",
+      "title": "Tarea 11 — Importación de tecnología en Ecuador",
+      "module": "tributario",
+      "parcial": 1,
+      "deliverableType": "Infografía",
+      "modality": "Grupal",
+      "date": "Septiembre 2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 11 Importación de tecnología en Ecuador.pdf",
+      "summary": "Infografía sobre quién abastece de tecnología al Ecuador: China, Estados Unidos, Corea del Sur, España y México como principales proveedores. Destaca el arancel 0 % para celulares, tablets y PC desde 2019 y la homologación obligatoria ante ARCOTEL.",
+      "highlights": [
+        { "label": "Importado en 2024", "value": "US$ 34.601 M" },
+        { "label": "Equipos electrónicos", "value": "US$ 2.280 M" },
+        { "label": "Arancel celulares / PC", "value": "0 %" }
+      ]
+    },
+    {
+      "slug": "guia-ape-3-contratacion-laboral",
+      "title": "Guía APE 3 — Contratación laboral, deberes y derechos",
+      "module": "remuneraciones",
+      "parcial": 2,
+      "deliverableType": "Guía APE",
+      "modality": "Grupal",
+      "date": "Julio – Diciembre 2026",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/GUÍA APE 3 - Contratación laboral, deberes y derechos.pdf",
+      "featured": true,
+      "summary": "Análisis comparativo de siete documentos de vinculación laboral, organigrama de EncomiTrack (9 trabajadores en 5 niveles jerárquicos) y la aplicación EncomiTrack – Roles de Pago. La aplicación calcula aportes al IESS, décimos, fondos de reserva, vacaciones y horas suplementarias y extraordinarias, y se validó contra el rol de octubre de 2026.",
+      "highlights": [
+        { "label": "Nómina mensual", "value": "USD 9.672,00" },
+        { "label": "Costo laboral", "value": "USD 12.516,90" },
+        { "label": "Sobre sueldos", "value": "+29,4 %" },
+        { "label": "Trabajadores", "value": "9" }
+      ]
+    },
+    {
+      "slug": "pea-3-analisis-comparativo-contratos",
+      "title": "PEA N.º 3 — Análisis comparativo de contratos",
+      "module": "remuneraciones",
+      "parcial": 2,
+      "deliverableType": "Plantilla de análisis",
+      "modality": "Grupal",
+      "date": "20/10/2026",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Contratación laboral, deberes y derechos.pdf",
+      "summary": "Comparación de régimen, modalidad, jornada, remuneración, beneficios y seguridad social en siete casos públicos y privados. Concluye que el régimen jurídico, y no el cargo, define la protección del trabajador: una misma remuneración de USD 733 puede corresponder a un puesto estable o a uno sin indemnización.",
+      "highlights": [{ "label": "Casos analizados", "value": "7" }]
+    },
+    {
+      "slug": "tarea-12-contratacion-personal",
+      "title": "Tarea 12 — Aplicación práctica: contratación de personal",
+      "module": "remuneraciones",
+      "parcial": 1,
+      "deliverableType": "Aplicación práctica",
+      "modality": "Grupal",
+      "date": "22/09/2026",
+      "kind": "pdf",
+      "file": "Primer_Parcial/TAREA 12 Aplicación práctica – Contratación de personal.pdf",
+      "summary": "Simulación de la contratación de un desarrollador para EncomiTrack: verificaciones oficiales, vacante en Encuentra Empleo y aviso de entrada al IESS. La obligación de mayor impacto es el aporte patronal (12,15 %), y cada trabajador cuesta cerca de $838 al mes, casi un 40 % más que su sueldo.",
+      "highlights": [
+        { "label": "Sueldo", "value": "$600,00" },
+        { "label": "Aporte patronal", "value": "$72,90" },
+        { "label": "Costo mensual", "value": "≈ $838" }
+      ]
+    },
+    {
+      "slug": "modos-produccion-contratos",
+      "title": "Sistemas económicos y caso de contratos laborales",
+      "module": "remuneraciones",
+      "parcial": 2,
+      "deliverableType": "Tarea",
+      "modality": "Individual",
+      "date": "Segundo parcial",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Modos de producción, datos ministerio de trabajo y caso de contratos laborales.pdf",
+      "summary": "Cuadro comparativo de los modos de producción (comunidad primitiva, esclavismo, feudalismo, capitalismo y socialismo). Incluye la revisión de contratos ficticios, en la que se dictamina el cumplimiento de jornada, vacaciones, IESS y renuncia.",
+      "highlights": []
+    },
+    {
+      "slug": "guia-ape-4-despidos-liquidaciones",
+      "title": "Guía APE 4 — Despidos y liquidaciones laborales",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Guía APE",
+      "modality": "Grupal",
+      "date": "18/11/2026",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/GUÍA APE 4 – DESPIDOS Y LIQUIDACIONES LABORALES.pdf",
+      "featured": true,
+      "summary": "Sistema EncomiTrack de desvinculación laboral, en cinco etapas: Datos, Paz y salvo, Liquidación, Documentos y Finalizado. Genera los PDF de paz y salvo, liquidación de haberes y anexo de vacaciones. Casos resueltos: renuncia voluntaria (EXP-0001) y fin de contrato con menos de un año (EXP-0002), donde el desahucio y los fondos de reserva resultan en $0.",
+      "highlights": [
+        { "label": "EXP-0001 haberes", "value": "$3.084,32" },
+        { "label": "EXP-0001 deducciones", "value": "$242,53" },
+        { "label": "EXP-0001 neto", "value": "$2.841,79" },
+        { "label": "EXP-0002 neto", "value": "$601,98" }
+      ]
+    },
+    {
+      "slug": "calculo-liquidaciones-mdt",
+      "title": "Cálculo de liquidaciones con la calculadora del Ministerio del Trabajo",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Actividad en clase",
+      "modality": "Individual",
+      "date": "Segundo parcial",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Cálculo de liquidaciones laborales mediante la calculadora del Ministerio del Trabajo.pdf",
+      "summary": "Resolución de varios casos de terminación laboral con la calculadora oficial del MDT: acuerdo mutuo, desahucio, conclusión de obra y fallecimiento (pago a derechohabientes), cada uno con su conclusión sobre los rubros que corresponden.",
+      "highlights": [
+        { "label": "Acuerdo mutuo", "value": "$8.720,74" },
+        { "label": "Conclusión de obra", "value": "$3.410,79" },
+        { "label": "Desahucio", "value": "$2.249,26" },
+        { "label": "Derechohabientes", "value": "$566,74" }
+      ]
+    },
+    {
+      "slug": "pitch-caso-real-derechos-laborales",
+      "title": "Pitch — Caso real sobre derechos laborales",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Pitch",
+      "modality": "Grupal",
+      "date": "Octubre 2026",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Pitch – Caso real sobre derechos laborales.pdf",
+      "summary": "Caso Carlos Enrique Gavilema Velásquez vs. Banco Pichincha C.A. (juicio laboral N.º 02331-2026-00245, Unidad Judicial Civil de Guaranda): demanda por despido intempestivo y reclamos de remuneración y bonificación por desahucio, con audiencia única convocada para el 22 de octubre de 2026.",
+      "highlights": [{ "label": "Estado", "value": "Sin sentencia" }]
+    },
+    {
+      "slug": "video-caso-judicial",
+      "title": "Video pitch — Caso judicial",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Video pitch",
+      "modality": "Grupal",
+      "date": "14/10/2026",
+      "kind": "video",
+      "externalUrl": "https://drive.google.com/file/d/17WU1MjWcGK0cl7dmuepC0L58DJ3KGzXu/view",
+      "featured": true,
+      "summary": "Presentación en video del caso judicial real Gavilema vs. Banco Pichincha, que acompaña a las diapositivas del pitch.",
+      "highlights": [{ "label": "Formato", "value": "MP4 · 58 MB" }]
+    },
+    {
+      "slug": "actividad-pitch-despido",
+      "title": "Actividad grupal — ¿Qué me corresponde al terminar la relación laboral?",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Pitch",
+      "modality": "Grupal",
+      "date": "Segundo parcial",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Actividad grupal ¿Qué me corresponde al terminar la relación laboral.pdf",
+      "externalUrl": "https://utaedu-my.sharepoint.com/:v:/g/personal/kcarrasco4232_uta_edu_ec/IQDaJXjTw29ToCHpMHCFmuSAaO2kW1DJkrzH0gLMrkZnGo",
+      "summary": "Portada de la actividad «Pitch Despido» con el enlace al video alojado en OneDrive institucional de la UTA (requiere iniciar sesión con cuenta UTA).",
+      "highlights": []
+    },
+    {
+      "slug": "laboral-hack-gincana",
+      "title": "Laboral Hack — Gincana digital de legislación laboral",
+      "module": "liquidacion",
+      "parcial": 2,
+      "deliverableType": "Gamificación",
+      "modality": "Grupal",
+      "date": "Segundo parcial",
+      "kind": "pdf",
+      "file": "Seundo_Parcial/Laboral Hack – Gincana digital de legislación laboral.pdf",
+      "externalUrl": "https://create.kahoot.it/share/terminacion-del-contrato-laboral-casos-y-articulosclave/d945fac7-bac6-404b-91bd-7913ce66a44e",
+      "summary": "Kahoot diseñado por el equipo sobre la terminación del contrato laboral: casos y artículos clave del Código del Trabajo.",
+      "highlights": []
+    }
+  ],
+  "systems": [
+    {
+      "slug": "sistema-roles-de-pago",
+      "module": "remuneraciones",
+      "title": "EncomiTrack — Roles de Pago",
+      "url": "/nominas",
+      "description": "Gestión de cargos, trabajadores y novedades mensuales; cálculo automático de IESS, décimos, fondos de reserva, vacaciones y horas extra, con exportación a Excel y PDF.",
+      "source": "Guía APE 3"
+    },
+    {
+      "slug": "sistema-paz-y-salvo",
+      "module": "liquidacion",
+      "title": "EncomiTrack — Paz y salvo y liquidación",
+      "url": "/liquidacion",
+      "description": "Expedientes de desvinculación con certificación del paz y salvo por áreas, cálculo de la liquidación de haberes y generación de PDF firmados.",
+      "source": "Guía APE 4"
+    }
+  ]
+}
