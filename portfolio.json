@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "titulo": "EncomiTrack",
+  "resumen": "Suite de talento humano para empresas ecuatorianas: roles de pago con parámetros legales por vigencia y paz y salvo con liquidación laboral, desplegada con un solo docker compose.",
+  "categorias": ["fullstack", "emprendimiento"],
+  "stack": ["Next.js", "Angular", "Express", "TypeORM", "SQLite", "Docker", "nginx"],
+  "estado": "MVP funcional",
+  "destacado": true,
+  "anio": 2026,
+  "rol": "Diseño y desarrollo completo",
+  "portada": "docs/img/02-nomina-panel.png",
+  "capturas": [
+    "docs/img/01-inicio.png",
+    "docs/img/02-nomina-panel.png",
+    "docs/img/04-nomina-rol.png",
+    "docs/img/03-nomina-organigrama.png",
+    "docs/img/08-liquidacion-paz-y-salvo.png",
+    "docs/img/09-liquidacion-calculo.png"
+  ],
+  "aspectos": [
+    "Cálculo monetario sin punto flotante (bigint en centavos y decimal.js)",
+    "Parámetros legales versionados por vigencia: los roles anteriores no cambian",
+    "Tres regímenes laborales (CT, LOSEP, LOEP) sin condicionales en el motor",
+    "Gateway nginx: una sola entrada para varias apps servidas por subruta"
+  ],
+  "demo": null
+}

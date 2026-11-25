@@ -1,0 +1,7 @@
+# Finales de línea LF en el repositorio; los scripts de shell siempre en LF
+# porque se ejecutan dentro de contenedores Linux.
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.ico binary
+*.db binary

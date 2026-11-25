@@ -1,0 +1,15 @@
+{
+  "viewport": { "width": 1440, "height": 900 },
+  "colorScheme": "light",
+  "shots": [
+    { "name": "01-inicio", "url": "http://localhost:8080/" },
+    { "name": "02-nomina-panel", "url": "http://localhost:8080/nominas" },
+    { "name": "03-nomina-organigrama", "url": "http://localhost:8080/nominas/organizacion" },
+    { "name": "04-nomina-rol", "url": "http://localhost:8080/nominas/historial/2026-10" },
+    { "name": "05-nomina-parametros", "url": "http://localhost:8080/nominas/parametros" },
+    { "name": "06-liquidacion-panel", "url": "http://localhost:8080/liquidacion/dashboard" },
+    { "name": "07-liquidacion-expediente", "url": "http://localhost:8080/liquidacion/expedientes/1" },
+    { "name": "08-liquidacion-paz-y-salvo", "url": "http://localhost:8080/liquidacion/expedientes/1", "click": ["Paz y salvo"] },
+    { "name": "09-liquidacion-calculo", "url": "http://localhost:8080/liquidacion/expedientes/1", "click": ["Liquidación", "Calcular ahora"] }
+  ]
+}

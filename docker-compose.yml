@@ -1,0 +1,68 @@
+# EncomiTrack · suite completa en un solo comando.
+#
+#   docker compose up -d --build      →  http://localhost:8080
+#
+# El gateway (nginx) es el único servicio con puerto publicado (solo en 127.0.0.1)
+# y enruta por subruta a cada aplicación:
+#   /              página de inicio de la suite
+#   /nominas/      Roles de pago (Next.js + SQLite)
+#   /liquidacion/  Paz y salvo y liquidación (Angular + Express + SQLite)
+#
+# Cada aplicación también puede desplegarse por separado: ver apps/*/README.md.
+name: ${COMPOSE_PROJECT_NAME:-encomitrack}
+
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "127.0.0.1:${PORT:-8080}:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./gateway/html:/usr/share/nginx/html:ro
+    depends_on:
+      - nomina
+      - liquidacion-frontend
+    restart: unless-stopped
+
+  nomina:
+    build:
+      context: ./apps/nomina
+      args:
+        BASE_PATH: /nominas
+    environment:
+      TZ: ${TZ:-America/Guayaquil}
+      # 1 = si la base está vacía, carga la empresa y los empleados de ejemplo (ficticios).
+      CARGAR_DATOS_EJEMPLO: ${CARGAR_DATOS_EJEMPLO:-1}
+    volumes:
+      - nomina_data:/app/data
+    restart: unless-stopped
+
+  liquidacion-backend:
+    build:
+      context: ./apps/liquidacion/backend
+    environment:
+      BASE_PATH: /liquidacion
+      PORT: 3000
+      DB_PATH: /data/app.db
+      UPLOADS_DIR: /data/uploads
+      TZ: ${TZ:-America/Guayaquil}
+    volumes:
+      - liquidacion_data:/data
+    restart: unless-stopped
+
+  liquidacion-frontend:
+    build:
+      context: ./apps/liquidacion/frontend
+      args:
+        BASE_PATH: /liquidacion
+    environment:
+      BASE_PATH: /liquidacion
+      LISTEN_PORT: 8080
+      BACKEND_URL: http://liquidacion-backend:3000
+    depends_on:
+      - liquidacion-backend
+    restart: unless-stopped
+
+volumes:
+  nomina_data:
+  liquidacion_data:

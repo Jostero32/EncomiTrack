@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EncomiTrack</title>
+  <link rel="icon" href="favicon.ico" />
+  <style>
+    :root {
+      --azul: #11406f;
+      --azul-oscuro: #0c3157;
+      --azul-suave: #e5edf6;
+      --rojo: #ba2b32;
+      --amarillo: #e8b406;
+      --fondo: #f7f4f1;
+      --tarjeta: #ffffff;
+      --tinta: #1b2533;
+      --gris: #66615c;
+      --borde: #ddd6cf;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --fondo: #0f1722;
+        --tarjeta: #172333;
+        --tinta: #eef1f5;
+        --gris: #a5adb8;
+        --borde: #2a3a50;
+        --azul-suave: #1d3450;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--fondo);
+      color: var(--tinta);
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--azul);
+      color: #f1edea;
+      padding: 20px 16px;
+    }
+    .contenedor { max-width: 960px; margin: 0 auto; width: 100%; padding: 0 16px; }
+    header .contenedor { display: flex; align-items: center; gap: 14px; padding: 0; }
+    header img { width: 44px; height: 44px; }
+    header h1 { margin: 0; font-size: 1.4rem; letter-spacing: .01em; }
+    header p { margin: 2px 0 0; opacity: .8; font-size: .9rem; }
+    main { flex: 1; padding: 40px 0; }
+    .intro { color: var(--gris); max-width: 62ch; margin: 0 0 28px; line-height: 1.55; }
+    .modulos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    a.modulo {
+      display: block;
+      background: var(--tarjeta);
+      border: 1px solid var(--borde);
+      border-top: 4px solid var(--azul);
+      border-radius: 12px;
+      padding: 22px;
+      color: inherit;
+      text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    a.modulo:nth-child(2) { border-top-color: var(--amarillo); }
+    a.modulo:hover, a.modulo:focus-visible { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(17, 64, 111, .15); outline: none; }
+    .modulo h2 { margin: 0 0 6px; font-size: 1.15rem; }
+    .modulo .ruta { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; color: var(--gris); }
+    .modulo ul { margin: 14px 0 0; padding-left: 18px; color: var(--gris); line-height: 1.6; font-size: .93rem; }
+    .modulo .ir { display: inline-block; margin-top: 16px; font-weight: 600; color: var(--azul); }
+    @media (prefers-color-scheme: dark) { .modulo .ir { color: #8fb8e6; } }
+    footer { padding: 18px 0; color: var(--gris); font-size: .82rem; border-top: 1px solid var(--borde); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="contenedor">
+      <img src="brand/encomitrack.svg" alt="" />
+      <div>
+        <h1>EncomiTrack</h1>
+        <p>Gestión de talento humano para empresas ecuatorianas</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="contenedor">
+      <p class="intro">
+        Suite con dos módulos que comparten marca y despliegue. Los datos cargados
+        son ficticios y sirven para demostración.
+      </p>
+      <div class="modulos">
+        <a class="modulo" href="nominas/">
+          <h2>Roles de pago</h2>
+          <span class="ruta">/nominas</span>
+          <ul>
+            <li>Código de Trabajo, LOSEP y LOEP parametrizados</li>
+            <li>Décimos, fondos de reserva, horas extra e IESS</li>
+            <li>Rol individual y consolidado en PDF y Excel</li>
+          </ul>
+          <span class="ir">Abrir módulo →</span>
+        </a>
+        <a class="modulo" href="liquidacion/">
+          <h2>Paz y salvo y liquidación</h2>
+          <span class="ruta">/liquidacion</span>
+          <ul>
+            <li>Paz y salvo por áreas con evidencias</li>
+            <li>Cálculo de la liquidación laboral</li>
+            <li>Actas y documentos en PDF</li>
+          </ul>
+          <span class="ir">Abrir módulo →</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="contenedor">EncomiTrack · proyecto de emprendimiento</div>
+  </footer>
+</body>
+</html>
