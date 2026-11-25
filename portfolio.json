@@ -6,7 +6,7 @@
   "stack": ["Next.js", "Angular", "Express", "TypeORM", "SQLite", "Docker", "nginx"],
   "estado": "Desplegado",
   "destacado": true,
-  "orden": 1,
+  "orden": 4,
   "anio": 2026,
   "rol": "Diseño y desarrollo completo",
   "portada": "docs/img/01-inicio.png",
